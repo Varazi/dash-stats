@@ -1,0 +1,2 @@
+# Bundled third-party tools: never touch line endings or diff them.
+*.exe binary

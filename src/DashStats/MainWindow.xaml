@@ -1,0 +1,56 @@
+<Window x:Class="DashStats.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DashStats"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="11.5">
+    <Window.Resources>
+        <Style x:Key="HeaderBtn" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#9AA4B2" />
+            <Setter Property="FontSize" Value="9.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="5,0,0,0" />
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Background" Value="#14FFFFFF" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#FFFFFF" />
+                    <Setter Property="Background" Value="#30FFFFFF" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Border x:Name="Frame" CornerRadius="14" Padding="14,11,14,13"
+            Background="#E00E1116" BorderBrush="#26FFFFFF" BorderThickness="1">
+        <StackPanel>
+            <Grid x:Name="Header" Margin="0,0,0,8">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse x:Name="StatusDot" Width="9" Height="9" Fill="#7D8796" VerticalAlignment="Center" />
+                    <TextBlock x:Name="StatusText" Text="Starting…" Margin="8,0,0,0" FontSize="13.5" FontWeight="SemiBold"
+                               Foreground="#E8ECF1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="190" />
+                </StackPanel>
+                <StackPanel x:Name="Buttons" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock x:Name="EditBtn" Text="EDIT" Style="{StaticResource HeaderBtn}"
+                               ToolTip="Change what you monitor and how it looks"
+                               MouseLeftButtonDown="EditBtn_Down" />
+                    <TextBlock x:Name="AllBtn" Text="ALL" Style="{StaticResource HeaderBtn}"
+                               ToolTip="Switch between your chosen stats and every reading"
+                               MouseLeftButtonDown="AllBtn_Down" />
+                    <TextBlock x:Name="ViewBtn" Text="LITE" Style="{StaticResource HeaderBtn}"
+                               ToolTip="Main stats only (Ctrl+Alt+L)"
+                               MouseLeftButtonDown="ViewBtn_Down" />
+                    <TextBlock x:Name="PinBtn" Text="PIN" Style="{StaticResource HeaderBtn}"
+                               ToolTip="Show above every window, click-through (Ctrl+Alt+M to undo)"
+                               MouseLeftButtonDown="PinBtn_Down" />
+                </StackPanel>
+            </Grid>
+            <Border x:Name="LookHost" />
+            <StackPanel x:Name="Body" />
+        </StackPanel>
+    </Border>
+</Window>

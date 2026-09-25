@@ -1,0 +1,86 @@
+<Window x:Class="DashStats.SetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DashStats setup"
+        Background="#15181D" Foreground="#E8ECF1"
+        SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
+        FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="13">
+    <Window.Resources>
+        <Style x:Key="Flat" TargetType="Button">
+            <Setter Property="Background" Value="#161A21" />
+            <Setter Property="Foreground" Value="#E8ECF1" />
+            <Setter Property="BorderBrush" Value="#262B33" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.9" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#4EA8FF" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <StackPanel Orientation="Horizontal" Margin="36">
+        <!-- Choices -->
+        <Border Width="760" Background="#0E1116" BorderBrush="#262B33" BorderThickness="1" CornerRadius="20" Padding="28">
+            <StackPanel>
+                <TextBlock Text="DASH STATS · SETUP" FontSize="11" FontWeight="SemiBold" Foreground="#7D8796" />
+                <TextBlock Text="What do you use this PC for?" FontSize="26" FontWeight="Bold" Margin="0,6,0,4" />
+                <TextBlock TextWrapping="Wrap" Foreground="#8B94A3"
+                           Text="Tick everything that applies, then pick one as your main focus. Your main focus gets the big numbers; the rest show smaller. You can change this any time with EDIT on the widget or from the tray menu." />
+
+                <UniformGrid x:Name="Cards" Columns="2" Margin="-5,16,-5,0" />
+
+                <Border Height="1" Background="#1F242C" Margin="0,18,0,16" />
+                <Grid>
+                    <TextBlock Text="Pick a look" FontSize="17" FontWeight="Bold" />
+                    <TextBlock Text="Same stats, different style" Foreground="#8B94A3" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                </Grid>
+                <UniformGrid x:Name="Looks" Columns="4" Margin="-4,10,-4,0" />
+
+                <Border Height="1" Background="#1F242C" Margin="0,20,0,16" />
+                <Grid>
+                    <TextBlock x:Name="Summary" Foreground="#8B94A3" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,200,0" />
+                    <Button x:Name="SaveBtn" Style="{StaticResource Flat}" Content="Start monitoring" HorizontalAlignment="Right"
+                            Background="#E8ECF1" Foreground="#0E1116" BorderBrush="#E8ECF1" FontWeight="SemiBold" Padding="22,11"
+                            IsDefault="True" Click="Save_Click" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Live preview -->
+        <StackPanel Margin="36,0,0,0" Width="400">
+            <TextBlock x:Name="PreviewTitle" FontSize="11" FontWeight="SemiBold" Foreground="#8B94A3" Margin="0,0,0,10" />
+            <Border Background="#0E1116" BorderBrush="#262B33" BorderThickness="1" CornerRadius="14" Padding="14,11,14,13">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <Ellipse x:Name="PreviewDot" Width="9" Height="9" Fill="#7D8796" VerticalAlignment="Center" />
+                        <TextBlock x:Name="PreviewStatus" Margin="8,0,0,0" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Border x:Name="PreviewHost" />
+                </StackPanel>
+            </Border>
+            <TextBlock TextWrapping="Wrap" Foreground="#7D8796" FontSize="12" Margin="0,10,0,0"
+                       Text="This is your real widget with live readings from this PC. Big items come from your main focus; other picks add smaller rows." />
+        </StackPanel>
+    </StackPanel>
+</Window>

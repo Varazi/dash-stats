@@ -1,0 +1,15 @@
+# .NET build output
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Published app. dist/DashStats.exe is ~174 MB, over GitHub's 100 MB file limit; rebuild it with build.ps1.
+dist/
+
+# Editor / OS
+.vscode/
+*.swp
+Thumbs.db
+desktop.ini
