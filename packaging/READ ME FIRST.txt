@@ -1,0 +1,19 @@
+DashStats: install
+
+1. Unzip this folder (right-click the zip > Extract All).
+2. Double-click DashStats.exe.
+3. If Windows says "Windows protected your PC", click "More info", then "Run anyway".
+4. Click Yes when Windows asks for admin permission (needed to read temperatures and FPS).
+5. Click Yes to set it up on this PC.
+6. Tick what you use this PC for, pick one as your main focus, pick a look, and click "Start monitoring".
+
+It starts with Windows automatically from now on.
+
+Hotkeys
+  Ctrl+Alt+M   pin above all windows (clicks pass through) / back to desktop
+  Ctrl+Alt+H   hide / show
+  Ctrl+Alt+L   compact view
+
+Right-click the tray icon (near the clock) for everything else, including Uninstall.
+
+If it won't start at all: Windows Security > App & browser control > Smart App Control may be blocking it.

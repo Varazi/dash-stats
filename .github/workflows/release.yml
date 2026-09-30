@@ -1,0 +1,49 @@
+# Builds DashStats.exe and attaches it to a GitHub release whenever a version tag is pushed.
+#
+#   git tag v0.3.0
+#   git push --tags
+#
+# The tag should match <Version> in src/DashStats/DashStats.csproj.
+# https://github.com/Varazi/dash-stats/releases/latest always points at the newest release,
+# which is what the website's Download button uses.
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Check the tag matches the csproj version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}".TrimStart("v")
+          $ver = ([xml](Get-Content src/DashStats/DashStats.csproj)).Project.PropertyGroup.Version
+          if ($tag -ne $ver) { throw "Tag v$tag does not match <Version>$ver</Version> in DashStats.csproj" }
+
+      - name: Publish single-file exe
+        run: dotnet publish src/DashStats/DashStats.csproj -c Release -o dist
+
+      - name: Zip with the read-me
+        shell: pwsh
+        run: Compress-Archive -Path dist/DashStats.exe, "packaging/READ ME FIRST.txt" -DestinationPath dist/DashStats.zip
+
+      - name: Create the release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" dist/DashStats.exe dist/DashStats.zip `
+            --title "DashStats ${{ github.ref_name }}" --generate-notes

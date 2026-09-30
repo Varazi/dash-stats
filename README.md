@@ -3,11 +3,13 @@
 A small desktop widget for PC health: CPU/GPU temps, clocks, load and power, RAM, disks, battery, FPS for the
 app in front, and network health (speed, ping, jitter, packet loss, retransmits, hiccups).
 
-## Install on another PC
+## Install
 
-Copy `dist\DashStats.exe` over and double-click it. Nothing else is needed. Click **Yes** at the admin prompt
-and **Yes** at setup. Setup installs the PawnIO sensor driver, copies DashStats to
-`%LOCALAPPDATA%\Programs\DashStats`, starts it at sign-in and adds a Start menu shortcut.
+Download `DashStats.exe` from the [latest release](https://github.com/Varazi/dash-stats/releases/latest) and
+double-click it. Nothing else is needed. If Windows says "Windows protected your PC", click **More info → Run
+anyway** (the build isn't code-signed yet). Click **Yes** at the admin prompt and **Yes** at setup. Setup installs
+the PawnIO sensor driver, copies DashStats to `%LOCALAPPDATA%\Programs\DashStats`, starts it at sign-in and adds
+a Start menu shortcut.
 
 To update later, run the newer `DashStats.exe` from anywhere and it offers to replace the installed copy.
 Exit the running one from the tray icon first.
@@ -32,6 +34,22 @@ Exit the running one from the tray icon first.
 Settings and log live in `%APPDATA%\DashStats`. For troubleshooting, create `debug.flag` in that folder and
 every value is written to `snapshot.txt` each second.
 
+## Ship a new version
+
+1. Bump `<Version>` in `src/DashStats/DashStats.csproj` and commit.
+2. Tag and push: `git tag v0.3.0` then `git push && git push --tags` (the tag must match the version).
+3. The [Release workflow](.github/workflows/release.yml) builds the exe on GitHub and attaches it to a new
+   release. `releases/latest` moves to it automatically, so the website's download button needs no change.
+
+To do it by hand instead: `.\build.ps1`, then `gh release create v0.3.0 dist\DashStats.exe --generate-notes`.
+
+## Website
+
+`docs/` is the one-page site, served by GitHub Pages. Plain HTML and CSS, no build step. Links to the
+download, the repo and the donate page are set once in the `DASHSTATS_LINKS` block at the top of
+`docs/index.html`. The hero mock and the four look previews are CSS stand-ins marked `OWNER:`; replace them
+with screenshots when you have them.
+
 ## Notes
 
 - Windows **Smart App Control** blocks the unsigned exe. Turn it off, or code-sign the build.
@@ -42,6 +60,6 @@ every value is written to `snapshot.txt` each second.
 ## More
 
 - [BUILDING.md](BUILDING.md): toolchain, the exact publish command, how PresentMon and PawnIO are bundled.
-- [docs/NOTES.md](docs/NOTES.md): decisions, to-do list, known bugs, tested hardware, measured resource use.
-- [docs/PROJECT-BRIEF.md](docs/PROJECT-BRIEF.md): write-up for the website.
+- [notes/NOTES.md](notes/NOTES.md): decisions, to-do list, known bugs, tested hardware, measured resource use.
+- [notes/PROJECT-BRIEF.md](notes/PROJECT-BRIEF.md): write-up for the website.
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md): licenses of bundled components.
