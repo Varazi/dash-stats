@@ -40,6 +40,12 @@ sealed class Tray : IDisposable
         Check("Lite view", "Ctrl+Alt+L", s.Lite, _c.ToggleLite);
         Check("Overlay on top", "Ctrl+Alt+M", s.Overlay, _c.ToggleOverlay);
 
+        var see = new Forms.ToolStripMenuItem("Overlay transparency");
+        foreach (var t in Controller.TransparencySteps)
+            see.DropDownItems.Add(new Forms.ToolStripMenuItem(Controller.TransparencyName(t), null, (_, _) => _c.SetOverlayTransparency(t))
+                { Checked = s.OverlayTransparency == t });
+        _menu.Items.Add(see);
+
         var pos = new Forms.ToolStripMenuItem("Position");
         foreach (var (code, name) in Controller.Corners)
             pos.DropDownItems.Add(new Forms.ToolStripMenuItem(name, null, (_, _) => _c.SetCorner(code)) { Checked = s.Corner == code });
@@ -50,6 +56,8 @@ sealed class Tray : IDisposable
         _menu.Items.Add(restore);
         _menu.Items.Add(new Forms.ToolStripSeparator());
         Check("Start with Windows", null, s.StartWithWindows, _c.ToggleStartup);
+        _menu.Items.Add($"Check for updates… (v{Updater.CurrentText})", null, (_, _) => _c.CheckForUpdatesNow());
+        Check("Check for updates automatically", null, s.CheckForUpdates, _c.ToggleAutoUpdate);
         _menu.Items.Add("Open settings folder", null, (_, _) => _c.OpenDataFolder());
         _menu.Items.Add("Uninstall…", null, (_, _) => _c.Uninstall());
         _menu.Items.Add(new Forms.ToolStripSeparator());

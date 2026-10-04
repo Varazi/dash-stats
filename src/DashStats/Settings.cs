@@ -23,8 +23,15 @@ public sealed class Settings
 
     public bool Lite { get; set; }
     public bool Overlay { get; set; }
+    /// <summary>Overlay mode only: how see-through the background and panels are, 0 (solid) to 100 (numbers only).</summary>
+    public int OverlayTransparency { get; set; } = 20;
     public bool StartWithWindows { get; set; }
     public bool FirstRunDone { get; set; }
+
+    /// <summary>Look for a newer release in the background and offer it. "Check for updates…" in the tray works either way.</summary>
+    public bool CheckForUpdates { get; set; } = true;
+    /// <summary>"Remind me later" was picked: don't offer an update again before this time.</summary>
+    public DateTime? UpdateRemindAfter { get; set; }
 
     public int IntervalMs { get; set; } = 1000;
     public string PingHost { get; set; } = "1.1.1.1";

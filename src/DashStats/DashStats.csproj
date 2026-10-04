@@ -9,7 +9,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>DashStats</AssemblyName>
     <RootNamespace>DashStats</RootNamespace>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
+    <!-- Shown in the exe's Properties → Details; code signing requires these to be set and consistent. -->
+    <Product>DashStats</Product>
+    <AssemblyTitle>DashStats</AssemblyTitle>
+    <Description>DashStats PC health widget</Description>
+    <Company>Varazi</Company>
+    <Authors>Varazi</Authors>
+    <Copyright>Copyright © 2026 Varazi. MIT License.</Copyright>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <!-- WFO0003: DPI awareness is declared in the manifest on purpose (WPF owns the window). -->
     <NoWarn>$(NoWarn);CA1416;SYSLIB1054;WFO0003</NoWarn>

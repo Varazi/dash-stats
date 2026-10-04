@@ -25,7 +25,10 @@ public partial class MainWindow : Window
         [Level.Bad] = Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x6B))),
     };
     static readonly Brush DesktopBg = Freeze(new SolidColorBrush(Color.FromArgb(0xE0, 0x0E, 0x11, 0x16)));
-    static readonly Brush OverlayBg = Freeze(new SolidColorBrush(Color.FromArgb(0xD0, 0x0E, 0x11, 0x16)));
+    static readonly Brush DesktopBorder = Freeze(new SolidColorBrush(Color.FromArgb(0x26, 0xFF, 0xFF, 0xFF)));
+
+    /// <summary>0..1 opacity of the overlay's surfaces, from the transparency setting.</summary>
+    double OverlaySurface => 1 - Math.Clamp(S.OverlayTransparency, 0, 100) / 100.0;
 
     sealed class SectionUi
     {
@@ -249,7 +252,16 @@ public partial class MainWindow : Window
         }
 
         Buttons.Visibility = S.Overlay ? Visibility.Collapsed : Visibility.Visible;
-        Frame.Background = S.Overlay ? OverlayBg : DesktopBg;
+        if (S.Overlay)
+        {
+            Frame.Background = Freeze(new SolidColorBrush(Color.FromArgb((byte)(255 * OverlaySurface), 0x0E, 0x11, 0x16)));
+            Frame.BorderBrush = Freeze(new SolidColorBrush(Color.FromArgb((byte)(0x26 * OverlaySurface), 0xFF, 0xFF, 0xFF)));
+        }
+        else
+        {
+            Frame.Background = DesktopBg;
+            Frame.BorderBrush = DesktopBorder;
+        }
         bool list = ShowingList;
         Frame.Width = list ? (S.Lite ? LiteWidth : FullWidth) : (S.Lite ? LookLiteWidth : LookWidth);
         Body.Visibility = list ? Visibility.Visible : Visibility.Collapsed;
@@ -272,7 +284,9 @@ public partial class MainWindow : Window
     public void RebuildView()
     {
         var (big, small) = Catalog.Compose(S.Uses, S.MainUse);
-        _view = WidgetView.Create(S.Look, big, S.Lite ? [] : small);
+        Ui.SurfaceOpacity = S.Overlay ? OverlaySurface : 1;
+        try { _view = WidgetView.Create(S.Look, big, S.Lite ? [] : small); }
+        finally { Ui.SurfaceOpacity = 1; }
         LookHost.Child = _view.Root;
         ApplyMetrics();
     }
@@ -373,6 +387,10 @@ public partial class MainWindow : Window
         if (S.Uses.Count > 0) m.Items.Add(Item("Show every reading", _ctl.ToggleShowAll, S.ShowAll));
         m.Items.Add(Item("Lite view", _ctl.ToggleLite, S.Lite, "Ctrl+Alt+L"));
         m.Items.Add(Item("Overlay on top", _ctl.ToggleOverlay, S.Overlay, "Ctrl+Alt+M"));
+        var see = new MenuItem { Header = "Overlay transparency" };
+        foreach (var t in Controller.TransparencySteps)
+            see.Items.Add(Item(Controller.TransparencyName(t), () => _ctl.SetOverlayTransparency(t), S.OverlayTransparency == t));
+        m.Items.Add(see);
         var pos = new MenuItem { Header = "Position" };
         foreach (var (code, cname) in Controller.Corners)
             pos.Items.Add(Item(cname, () => _ctl.SetCorner(code), S.Corner == code));

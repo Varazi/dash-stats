@@ -4,7 +4,7 @@ DashStats includes or redistributes the following third-party software. Each rem
 
 ## Bundled executables
 
-These ship inside `DashStats.exe` (from `vendor/`) and are extracted to `%LOCALAPPDATA%\DashStats\bin\` at run time.
+These ship inside `DashStats.exe` (from `vendor/`) and are extracted to `C:\Program Files\DashStats\bin\` at run time.
 
 ### PresentMon
 

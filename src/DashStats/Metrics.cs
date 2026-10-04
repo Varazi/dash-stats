@@ -37,6 +37,12 @@ public static class Catalog
         new("power", "Power draw", "#A3E635"),
     }.ToDictionary(m => m.Id);
 
+    /// <summary>
+    /// Stats that are a share of something with a real "full" (load, memory, charge). Only these get a bar in the
+    /// Gauges look; temperatures, power, speeds, ping and counts have no natural maximum, so they show as numbers.
+    /// </summary>
+    public static readonly HashSet<string> Bars = ["cpu", "core", "gpu", "vram", "ram", "encoder", "battery"];
+
     public static readonly Preset[] Presets =
     [
         new("coding", "Coding & builds", "CPU and busiest core, RAM, disk activity", ["cpu", "core", "ram", "disk"]),
@@ -64,13 +70,19 @@ public static class Catalog
     {
         var chosen = Presets.Where(p => uses.Contains(p.Id)).ToList();
         var mainPreset = chosen.FirstOrDefault(p => p.Id == main) ?? chosen.FirstOrDefault();
-        var big = mainPreset?.Big.ToList() ?? [];
+        var big = mainPreset?.Big.Where(Applies).ToList() ?? [];
         var small = new List<string>();
         foreach (var p in chosen.Where(p => p != mainPreset))
-            foreach (var id in p.Big)
+            foreach (var id in p.Big.Where(Applies))
                 if (!big.Contains(id) && !small.Contains(id)) small.Add(id);
         return (big, small);
     }
+
+    /// <summary>Stats this PC can't have: Battery on a desktop would only ever show "—".</summary>
+    static bool Applies(string id) => id != "battery" || HasBattery;
+
+    static readonly bool HasBattery =
+        System.Windows.Forms.SystemInformation.PowerStatus.BatteryChargeStatus != System.Windows.Forms.BatteryChargeStatus.NoSystemBattery;
 }
 
 /// <summary>The last minute of every metric, so a look switch doesn't start graphs from empty.</summary>

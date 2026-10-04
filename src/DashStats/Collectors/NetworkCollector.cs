@@ -219,7 +219,7 @@ sealed class NetworkCollector : IDisposable
     {
         try
         {
-            var psi = new ProcessStartInfo("netsh", "wlan show interfaces")
+            var psi = new ProcessStartInfo(Setup.SystemExe("netsh"), "wlan show interfaces")
             { UseShellExecute = false, RedirectStandardOutput = true, CreateNoWindow = true };
             using var p = Process.Start(psi)!;
             string text = p.StandardOutput.ReadToEnd();

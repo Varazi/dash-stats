@@ -30,7 +30,7 @@ public partial class App : Application
         }
 
         var s = Settings.Load();
-        var result = s.FirstRunDone ? Setup.OfferUpdate() : Setup.FirstRun(s);
+        var result = s.FirstRunDone ? Setup.OfferUpdate(s) : Setup.FirstRun(s);
         if (result != Setup.Result.Continue)
         {
             if (result == Setup.Result.Relaunch)
@@ -57,6 +57,7 @@ public partial class App : Application
         _collector = new Collector(s);
         _collector.Updated += (rows, metrics) => Dispatcher.BeginInvoke(DispatcherPriority.Background, () => ctl.OnTick(rows, metrics));
         _collector.Start();
+        Updater.Start(ctl);
 
         // Nothing picked yet (fresh install, or upgrading from before presets): ask what to monitor.
         // Dev hook: an "open-setup.flag" file in the settings folder opens setup once, since the elevated app
@@ -65,6 +66,16 @@ public partial class App : Application
         bool forced = File.Exists(flag);
         if (forced) try { File.Delete(flag); } catch { }
         if (s.Uses.Count == 0 || forced) ctl.OpenSetup();
+    }
+
+    /// <summary>Hands over to another copy of the exe (after an update): it waits on our mutex, so release that first.</summary>
+    public void Restart(string exe)
+    {
+        _collector?.Dispose();
+        _collector = null;
+        ReleaseMutex();
+        Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true, WorkingDirectory = Path.GetDirectoryName(exe) });
+        Shutdown();
     }
 
     void ReleaseMutex()

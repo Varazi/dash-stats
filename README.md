@@ -8,7 +8,7 @@ app in front, and network health (speed, ping, jitter, packet loss, retransmits,
 Download `DashStats.exe` from the [latest release](https://github.com/Varazi/dash-stats/releases/latest) and
 double-click it. Nothing else is needed. If Windows says "Windows protected your PC", click **More info → Run
 anyway** (the build isn't code-signed yet). Click **Yes** at the admin prompt and **Yes** at setup. Setup installs
-the PawnIO sensor driver, copies DashStats to `%LOCALAPPDATA%\Programs\DashStats`, starts it at sign-in and adds
+the PawnIO sensor driver, copies DashStats to `C:\Program Files\DashStats`, starts it at sign-in and adds
 a Start menu shortcut.
 
 To update later, run the newer `DashStats.exe` from anywhere and it offers to replace the installed copy.
@@ -29,7 +29,7 @@ Exit the running one from the tray icon first.
 ## Build
 
 - `.\build.ps1` builds `dist\DashStats.exe`, a self-contained single file.
-- `.\dev.ps1` rebuilds and restarts the installed copy without a UAC prompt.
+- `.\dev.ps1` (from an admin terminal) rebuilds and restarts the installed copy.
 
 Settings and log live in `%APPDATA%\DashStats`. For troubleshooting, create `debug.flag` in that folder and
 every value is written to `snapshot.txt` each second.
@@ -40,15 +40,19 @@ every value is written to `snapshot.txt` each second.
 2. Tag and push: `git tag v0.3.0` then `git push && git push --tags` (the tag must match the version).
 3. The [Release workflow](.github/workflows/release.yml) builds the exe on GitHub and attaches it to a new
    release. `releases/latest` moves to it automatically, so the website's download button needs no change.
+4. Installed copies (0.3.0 and later) notice the new release within a few hours and offer to update.
+   This needs the repo (or at least its releases) to be public; while it's private the check quietly fails.
 
 To do it by hand instead: `.\build.ps1`, then `gh release create v0.3.0 dist\DashStats.exe --generate-notes`.
 
 ## Website
 
-`docs/` is the one-page site, served by GitHub Pages. Plain HTML and CSS, no build step. Links to the
-download, the repo and the donate page are set once in the `DASHSTATS_LINKS` block at the top of
-`docs/index.html`. The hero mock and the four look previews are CSS stand-ins marked `OWNER:`; replace them
-with screenshots when you have them.
+`docs/index.html` is the one-page site, served by GitHub Pages: one self-contained HTML file, no build step. The
+download, GitHub and tip (Stripe Payment Link) URLs are set once in the `DASHSTATS_LINKS` block near the top.
+The widgets on the page are drawn live in the browser with example readings, matching the app's looks.
+The background is a rolling wave of dots joined into a faint wireframe mesh, with soft smoke in the bottom corners.
+Headings use Sora. An alternative aurora background
+is kept in `design/website-aurora.html`.
 
 ## Notes
 
@@ -60,6 +64,5 @@ with screenshots when you have them.
 ## More
 
 - [BUILDING.md](BUILDING.md): toolchain, the exact publish command, how PresentMon and PawnIO are bundled.
-- [notes/NOTES.md](notes/NOTES.md): decisions, to-do list, known bugs, tested hardware, measured resource use.
-- [notes/PROJECT-BRIEF.md](notes/PROJECT-BRIEF.md): write-up for the website.
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md): licenses of bundled components.
+- [LICENSE](LICENSE): MIT.

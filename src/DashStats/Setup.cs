@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Security;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Windows;
@@ -17,8 +18,16 @@ static class Setup
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DashStats");
     static readonly string LocalDir =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DashStats");
+    /// <summary>
+    /// Program Files, because the startup task runs this exe as admin: only admins may be able to replace it
+    /// (or the tools in bin\), or any program running as the user could get admin rights at the next sign-in.
+    /// </summary>
     public static readonly string InstallDir =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "DashStats");
+    /// <summary>Where 0.2.0 and earlier installed: user-writable, so we move out of it.</summary>
+    static readonly string LegacyInstallDir =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "DashStats");
+    static string LegacyExe => Path.Combine(LegacyInstallDir, "DashStats.exe");
     static readonly string Shortcut =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "DashStats.lnk");
 
@@ -35,15 +44,24 @@ static class Setup
         return key is not null;
     }
 
-    /// <summary>Writes a bundled tool next to our data (once per version) and returns its path.</summary>
+    /// <summary>
+    /// Writes a bundled tool to the admin-only bin folder and returns its path. Call it right before every launch:
+    /// the copy on disk is compared with the bundled one by SHA-256 and rewritten if it differs.
+    /// </summary>
     public static string Extract(string name)
     {
-        var dir = Path.Combine(LocalDir, "bin");
+        var dir = Path.Combine(InstallDir, "bin");
         Directory.CreateDirectory(dir);
         var path = Path.Combine(dir, name);
         using var res = Assembly.GetExecutingAssembly().GetManifestResourceStream(name)
                         ?? throw new FileNotFoundException("Missing bundled " + name);
-        if (File.Exists(path) && new FileInfo(path).Length == res.Length) return path;
+        var want = SHA256.HashData(res);
+        if (File.Exists(path))
+        {
+            using var existing = File.OpenRead(path);
+            if (SHA256.HashData(existing).AsSpan().SequenceEqual(want)) return path;
+        }
+        res.Position = 0;
         using var f = File.Create(path);
         res.CopyTo(f);
         return path;
@@ -67,9 +85,11 @@ static class Setup
             "Welcome to DashStats!\n\n" +
             "Set it up on this PC? This will:\n" +
             "  •  install the PawnIO sensor driver (needed for CPU temperatures)\n" +
-            "  •  install DashStats to your user Programs folder\n" +
+            "  •  install DashStats to Program Files\n" +
             "  •  start it automatically when you sign in\n" +
             "  •  add a Start menu shortcut\n\n" +
+            "It checks GitHub for new versions now and then and asks before installing one\n" +
+            "(you can turn that off from the tray icon). Nothing about you or this PC is sent.\n\n" +
             "Yes = set up     No = just run it from here     Cancel = quit",
             "DashStats setup", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
@@ -99,9 +119,15 @@ static class Setup
     }
 
     /// <summary>Run from somewhere else while an installed copy exists: offer to replace it with this build.</summary>
-    public static Result OfferUpdate()
+    public static Result OfferUpdate(Settings s)
     {
-        if (IsInstalledCopy || !File.Exists(InstalledExe)) return Result.Continue;
+        if (IsInstalledCopy)
+        {
+            RemoveLegacyInstall();
+            return Result.Continue;
+        }
+        if (File.Exists(LegacyExe) && !File.Exists(InstalledExe)) return MoveLegacyInstall(s);
+        if (!File.Exists(InstalledExe)) return Result.Continue;
         var mine = FileVersionInfo.GetVersionInfo(ExePath);
         var theirs = FileVersionInfo.GetVersionInfo(InstalledExe);
         if (new FileInfo(ExePath).Length == new FileInfo(InstalledExe).Length && mine.FileVersion == theirs.FileVersion)
@@ -112,6 +138,40 @@ static class Setup
             "DashStats", MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (answer != MessageBoxResult.Yes) return Result.Continue;
         return CopyToInstallDir() ? Result.Relaunch : Result.Continue;
+    }
+
+    /// <summary>
+    /// 0.2.0 and earlier lived in %LOCALAPPDATA%\Programs. Install this build to Program Files instead and point
+    /// the startup task and shortcut there. When run from the old folder itself, do it without asking.
+    /// </summary>
+    static Result MoveLegacyInstall(Settings s)
+    {
+        bool fromLegacy = string.Equals(Path.GetFullPath(ExePath), LegacyExe, StringComparison.OrdinalIgnoreCase);
+        if (!fromLegacy)
+        {
+            var theirs = FileVersionInfo.GetVersionInfo(LegacyExe).FileVersion;
+            var mine = FileVersionInfo.GetVersionInfo(ExePath).FileVersion;
+            if (MessageBox.Show(
+                    $"DashStats {theirs} is installed on this PC.\n\nReplace it with this copy ({mine})? " +
+                    "It moves to Program Files, where other programs can't tamper with it.",
+                    "DashStats", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                return Result.Continue;
+        }
+        CopyToInstallDir();
+        CreateShortcut();
+        if (s.StartWithWindows || StartupRegistered()) s.StartWithWindows = SetStartup(true, InstalledExe);
+        s.Save();
+        Log.Write($"Moved the install from {LegacyInstallDir} to {InstallDir}");
+        return Result.Relaunch;
+    }
+
+    /// <summary>The old per-user install and its extracted tools, once we run from Program Files.</summary>
+    static void RemoveLegacyInstall()
+    {
+        try { if (Directory.Exists(LegacyInstallDir)) Directory.Delete(LegacyInstallDir, recursive: true); }
+        catch (Exception e) { Log.Write("Old install not removed yet: " + e.Message); }
+        try { if (Directory.Exists(Path.Combine(LocalDir, "bin"))) Directory.Delete(Path.Combine(LocalDir, "bin"), recursive: true); }
+        catch { }
     }
 
     static bool CopyToInstallDir()
@@ -210,16 +270,23 @@ static class Setup
         SetStartup(false);
         try { File.Delete(Shortcut); } catch { }
         // We may be running from the install folder; delete once we've exited.
-        string cmd = $"/c timeout /t 3 /nobreak >nul & rmdir /s /q \"{InstallDir}\" & rmdir /s /q \"{LocalDir}\" & rmdir /s /q \"{DataDir}\"";
-        Process.Start(new ProcessStartInfo("cmd.exe", cmd) { UseShellExecute = false, CreateNoWindow = true });
+        string cmd = $"/c timeout /t 3 /nobreak >nul & rmdir /s /q \"{InstallDir}\" & rmdir /s /q \"{LegacyInstallDir}\" " +
+                     $"& rmdir /s /q \"{LocalDir}\" & rmdir /s /q \"{DataDir}\"";
+        Process.Start(new ProcessStartInfo(SystemExe("cmd"), cmd) { UseShellExecute = false, CreateNoWindow = true });
         return true;
     }
+
+    /// <summary>
+    /// Full path to a Windows tool. A bare "schtasks" is also looked up in the current folder, and we run as admin,
+    /// so a fake schtasks.exe next to a downloaded DashStats.exe would otherwise run elevated.
+    /// </summary>
+    public static string SystemExe(string name) => Path.Combine(Environment.SystemDirectory, name + ".exe");
 
     static int Run(string exe, string args)
     {
         try
         {
-            using var p = Process.Start(new ProcessStartInfo(exe, args)
+            using var p = Process.Start(new ProcessStartInfo(SystemExe(exe), args)
             { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true })!;
             p.StandardOutput.ReadToEnd();
             p.WaitForExit(10_000);

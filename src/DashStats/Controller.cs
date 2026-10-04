@@ -98,6 +98,26 @@ public sealed class Controller(Settings s)
         S.Overlay = !S.Overlay;
         S.Save();
         if (!Win.IsVisible) Win.Show();
+        Win.RebuildView(); // tiles and panels fade with the overlay transparency
+        Win.ApplyMode();
+    }
+
+    public static readonly int[] TransparencySteps = [0, 20, 40, 60, 80, 100];
+
+    public static string TransparencyName(int t) => t switch
+    {
+        0 => "0% (solid)",
+        100 => "100% (numbers only)",
+        _ => $"{t}%",
+    };
+
+    /// <summary>Saved even outside overlay mode, so it can be set up before switching to the overlay.</summary>
+    public void SetOverlayTransparency(int percent)
+    {
+        S.OverlayTransparency = percent;
+        S.Save();
+        if (!S.Overlay) return;
+        Win.RebuildView();
         Win.ApplyMode();
     }
 
@@ -138,6 +158,15 @@ public sealed class Controller(Settings s)
     public void ToggleStartup()
     {
         S.StartWithWindows = Setup.SetStartup(!S.StartWithWindows);
+        S.Save();
+    }
+
+    public void CheckForUpdatesNow() => _ = Updater.Check(this, manual: true);
+
+    public void ToggleAutoUpdate()
+    {
+        S.CheckForUpdates = !S.CheckForUpdates;
+        S.UpdateRemindAfter = null;
         S.Save();
     }
 

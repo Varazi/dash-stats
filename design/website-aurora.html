@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="favicon.svg">
-<title>DashStats: PC health widget for Windows</title>
+<title>DashStats Aurora</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
-/* Layout: the page is a desktop wallpaper. A rolling wave of dots joined into a faint wireframe mesh sits behind everything, coloured by height in the widget's own sensor colours, with faint smoke in the bottom corners; the live widget sits on it in the hero, and the copy reads on a darkening veil below. One dark world on purpose: it's the widget's world. */
+/* Layout: the page is a desktop wallpaper. A slow aurora in the widget's own sensor colours moves behind everything; the live widget sits on it in the hero, and the copy reads on a darkening veil below. One dark world on purpose: it's the widget's world. */
 :root {
   --ground: #090B10;
   --ink: #EEF1F5;
@@ -18,7 +18,7 @@
   --rule: rgba(255,255,255,.09);
   --glass: rgba(12,15,20,.62);
   --cpu: #4EA8FF; --gpu: #5BD68A; --net: #45D0E0; --mem: #C792EA; --fps: #FFD166; --temp: #FF9F6E;
-  --display: "Sora", "Segoe UI", system-ui, sans-serif;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
   color-scheme: dark;
@@ -34,9 +34,6 @@ code, kbd { font-family: var(--mono); font-size: .86em; }
 kbd { padding: 1px 7px 2px; border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 6px; background: rgba(255,255,255,.05); white-space: nowrap; }
 
 #aurora { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
-#smoke { position: fixed; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); display: block; z-index: 0; pointer-events: none; filter: blur(22px); }
-h1 { font-weight: 700; letter-spacing: -.045em; }
-h2 { font-weight: 700; letter-spacing: -.035em; }
 .veil { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(9,11,16,0) 0%, rgba(9,11,16,.35) 45%, rgba(9,11,16,.78) 100%); }
 .page { position: relative; z-index: 1; max-width: 1160px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 20px 56px; }
 
@@ -245,7 +242,6 @@ footer a { color: var(--soft); }
 
 <canvas id="aurora" aria-hidden="true"></canvas>
 <div class="veil" aria-hidden="true"></div>
-<canvas id="smoke" aria-hidden="true"></canvas>
 
 <div class="page">
   <header class="top">
@@ -753,87 +749,24 @@ footer a { color: var(--soft); }
   });
   see.addEventListener('input', function () { out.textContent = see.value + '%' + (see.value === '100' ? ' (numbers only)' : see.value === '0' ? ' (solid)' : ''); D.render(ov); });
 
-  // ---------- background: a rolling wave of dots joined into a faint wireframe mesh, coloured by height ----------
-  // Lines and dots are grouped by colour into a few Path2D batches, so a frame is a couple of hundred draw calls.
-  var cv = document.getElementById('aurora'), ctx = cv.getContext('2d');
-  var W = 0, H = 0, dpr = 1;
-  function size() { dpr = Math.min(1.5, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
-  size(); addEventListener('resize', size);
-  // low → high: blue, cyan, green, yellow (the widget's own scale from calm to busy)
-  var STOPS = [[78, 168, 255], [69, 208, 224], [91, 214, 138], [255, 209, 102]];
-  function shade(v) {
-    v = Math.round(Math.min(1, Math.max(0, v)) * 24) / 24 * (STOPS.length - 1);
-    var i = Math.min(STOPS.length - 2, Math.floor(v)), f = v - i, a = STOPS[i], b = STOPS[i + 1];
-    return ((a[0] + (b[0] - a[0]) * f) | 0) + ',' + ((a[1] + (b[1] - a[1]) * f) | 0) + ',' + ((a[2] + (b[2] - a[2]) * f) | 0);
-  }
-  function key(c, a) { return c + ',' + (Math.round(Math.min(1, Math.max(0, a)) * 40) / 40).toFixed(3); }
-  function batch(map, k) { var p = map.get(k); if (!p) { p = new Path2D(); map.set(k, p); } return p; }
-  var COLS = 60, ROWS = 32, camY = 1.0;
-  function height(x, z, t) {
-    return 0.26 * Math.sin(x * 0.9 + t * 0.55 + z * 0.5) + 0.17 * Math.sin(z * 1.35 - t * 0.8 + x * 0.3) + 0.09 * Math.sin((x + z) * 2.2 + t * 1.3);
-  }
-  function frame(t) {
-    var horizon = H * 0.27, spread = Math.max(W, 900) * 0.5, P = [];
-    for (var j = 0; j < ROWS; j++) {
-      var row = [], z = 1.1 + j * 0.23;
-      for (var i = 0; i < COLS; i++) {
-        var x = (i / (COLS - 1) - 0.5) * 9, h = height(x, z + t * 0.35, t), sx = W / 2 + (x / z) * spread;
-        row.push({ x: sx, y: horizon + ((camY - h) / z) * H * 0.73, near: 1 - j / ROWS, z: z, c: shade((h + 0.5) / 1.0), on: sx > -40 && sx < W + 40 });
-      }
-      P.push(row);
-    }
-    ctx.fillStyle = '#090B10'; ctx.fillRect(0, 0, W, H);
-    // the mesh: each dot tied to its right and far neighbours, nearer rows brighter
-    var lines = new Map();
-    for (j = 0; j < ROWS - 1; j++) for (i = 0; i < COLS - 1; i++) {
-      var a = P[j][i], r = P[j][i + 1], f = P[j + 1][i], k = key(a.c, 0.03 + a.near * 0.16);
-      if (a.on || r.on) { var p = batch(lines, k); p.moveTo(a.x, a.y); p.lineTo(r.x, r.y); }
-      if (a.on || f.on) { p = batch(lines, k); p.moveTo(a.x, a.y); p.lineTo(f.x, f.y); }
-    }
-    ctx.lineWidth = 0.7;
-    lines.forEach(function (p, k) { ctx.strokeStyle = 'rgba(' + k + ')'; ctx.stroke(p); });
-    // the dots on top, at the joints
-    var dots = new Map();
-    for (j = 0; j < ROWS; j++) for (i = 0; i < COLS; i++) {
-      var d = P[j][i]; if (!d.on) continue;
-      var s = 0.5 + 2.1 / d.z;
-      batch(dots, key(d.c, 0.12 + d.near * 0.6)).rect(d.x - s, d.y - s, s * 2, s * 2);
-    }
-    dots.forEach(function (p, k) { ctx.fillStyle = 'rgba(' + k + ')'; ctx.fill(p); });
-  }
-  var still = matchMedia('(prefers-reduced-motion: reduce)').matches, t0 = performance.now(), last = 0;
-  function draw(now) {
-    try { if (now - last > 33) { last = now; frame(20 + (now - t0) / 1000); } } catch (e) { }   // never let one bad frame stop it
-    if (!still) requestAnimationFrame(draw);
-  }
-  requestAnimationFrame(draw);
-})();
-</script>
-<script>(function () {
-  // ---------- smoke: a faint grey-blue fog drifting in the bottom corners, above the dots, behind the text ----------
-  var cv = document.getElementById('smoke');
-  var gl = cv && cv.getContext('webgl', { antialias: false, premultipliedAlpha: true, alpha: true });
-  if (!gl) return;
+  // ---------- aurora: domain-warped noise in the sensor colours, drawn at low resolution ----------
+  var cv = document.getElementById('aurora');
+  var gl = cv.getContext('webgl', { antialias: false, premultipliedAlpha: false });
+  if (!gl) { cv.style.background = 'radial-gradient(80% 60% at 20% 10%, #16304d, transparent), radial-gradient(70% 60% at 85% 30%, #183a2c, transparent), #090B10'; return; }
   var vs = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
   var fs = [
     'precision mediump float;uniform vec2 r;uniform float t;',
     'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
     'float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}',
-    'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*n(p);p=p*2.02+vec2(3.1,1.7);a*=.5;}return v;}',
-    'void main(){vec2 uv=gl_FragCoord.xy/r;float asp=r.x/r.y;vec2 p=uv*vec2(asp,1.)*2.4;float s=t*.035;',
-    // smoke rises a little and curls: warp the noise by itself
-    'vec2 q=vec2(fbm(p+vec2(s*.6,-s)),fbm(p+vec2(5.2,1.3)+vec2(-s*.4,-s*.8)));',
-    'float f=fbm(p+1.9*q+vec2(0.,-s*1.2));',
-    // vignette shape: strongest in the two bottom corners, a low band along the whole bottom, nothing up top
-    'vec2 sc=vec2(min(asp,1.8),1.);',
-    'float cl=1.-smoothstep(0.,.8,length(uv*sc*vec2(.8,1.2)));',
-    'float cr=1.-smoothstep(0.,.8,length((uv-vec2(1.,0.))*sc*vec2(.8,1.2)));',
-    'float band=(1.-smoothstep(0.,.3,uv.y))*.5;',
-    'float m=max(max(cl*cl,cr*cr),band);',
-    // the noise only shades the fog, so there are no thick blobs: 55% even haze, 45% drifting texture
-    'float d=m*(.55+.45*smoothstep(.2,.85,f));',
-    'float a=d*.3;',
-    'gl_FragColor=vec4(vec3(.56,.65,.76)*a,a);}'
+    'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}',
+    'void main(){vec2 uv=gl_FragCoord.xy/r;vec2 p=uv*vec2(r.x/r.y,1.)*1.5;float s=t*.035;',
+    'vec2 q=vec2(fbm(p+vec2(0.,s)),fbm(p+vec2(5.2,1.3)-s));',
+    'vec2 w=vec2(fbm(p+3.2*q+vec2(1.7,9.2)+s*1.4),fbm(p+3.2*q+vec2(8.3,2.8)-s*.9));',
+    'float f=fbm(p+2.6*w);',
+    'vec3 blue=vec3(.306,.659,1.),green=vec3(.357,.839,.541),cyan=vec3(.271,.816,.878),violet=vec3(.78,.573,.918);',
+    'vec3 c=mix(blue,violet,clamp(w.x*1.5-.25,0.,1.));c=mix(c,green,clamp(q.y*q.y*1.8-.2,0.,1.));c=mix(c,cyan,clamp(length(w)-.55,0.,1.));',
+    'float glow=smoothstep(.38,.92,f)*(.35+.65*uv.y);',
+    'vec3 base=vec3(.035,.043,.063);gl_FragColor=vec4(mix(base,c,glow*.62),1.);}'
   ].join('');
   function sh(type, src) { var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
   var pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr); gl.useProgram(pr);
@@ -841,13 +774,12 @@ footer a { color: var(--soft); }
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
   var loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   var ur = gl.getUniformLocation(pr, 'r'), ut = gl.getUniformLocation(pr, 't');
-  gl.clearColor(0, 0, 0, 0);
-  var SCALE = .22; // fog is soft anyway; low resolution keeps it cheap
+  var SCALE = .35; // soft by nature, so a third of the resolution looks the same and costs a ninth
   function size() { cv.width = Math.max(1, Math.round(innerWidth * SCALE)); cv.height = Math.max(1, Math.round(innerHeight * SCALE)); gl.viewport(0, 0, cv.width, cv.height); }
   size(); addEventListener('resize', size);
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches, t0 = performance.now(), last = 0;
   function draw(now) {
-    if (now - last > 40) { last = now; gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform2f(ur, cv.width, cv.height); gl.uniform1f(ut, 20 + (now - t0) / 1000); gl.drawArrays(gl.TRIANGLES, 0, 3); }
+    if (now - last > 33) { last = now; gl.uniform2f(ur, cv.width, cv.height); gl.uniform1f(ut, 40 + (now - t0) / 1000); gl.drawArrays(gl.TRIANGLES, 0, 3); }
     if (!still) requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);

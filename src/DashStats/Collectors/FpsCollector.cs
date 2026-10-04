@@ -139,7 +139,7 @@ sealed class FpsCollector : IDisposable
                 dead.Dispose();
                 Process = null;
             }
-            if (_exe == "") _exe = Setup.Extract("PresentMon.exe");
+            _exe = Setup.Extract("PresentMon.exe"); // re-checked on every (re)start
 
             var psi = new ProcessStartInfo(_exe,
                 $"--output_stdout --no_console_stats --stop_existing_session --session_name {SessionName} " +

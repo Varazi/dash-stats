@@ -19,8 +19,8 @@ static class Ui
     public static readonly Brush Text = Solid("#E8ECF1");
     public static readonly Brush Muted = Solid("#8B94A3");
     public static readonly Brush Faint = Solid("#7D8796");
-    public static readonly Brush Tile = Solid("#161A21");
-    public static readonly Brush Panel = Solid("#13171D");
+    public static Brush Tile => Faded("#161A21");
+    public static Brush Panel => Faded("#13171D");
     public static readonly Brush Track = Solid("#1F242C");
     public static readonly Brush Line = Solid("#1F242C");
 
@@ -30,6 +30,22 @@ static class Ui
         var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
         brush.Freeze();
         return Cache[hex] = brush;
+    }
+
+    /// <summary>
+    /// How opaque tile and panel backgrounds are for views built right now (overlay transparency). MainWindow sets it
+    /// around WidgetView.Create and puts it back to 1, so the setup preview is never affected.
+    /// </summary>
+    public static double SurfaceOpacity { get; set; } = 1;
+
+    static Brush Faded(string hex)
+    {
+        if (SurfaceOpacity >= 1) return Solid(hex);
+        var key = $"{hex}@{SurfaceOpacity:0.00}";
+        if (Cache.TryGetValue(key, out var b)) return b;
+        var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)) { Opacity = SurfaceOpacity };
+        brush.Freeze();
+        return Cache[key] = brush;
     }
 
     public static Brush Accent(string id) => Solid(Catalog.Metrics.TryGetValue(id, out var i) ? i.Color : "#9AA4B2");
@@ -84,13 +100,19 @@ abstract class WidgetView
     protected sealed class SmallRows
     {
         readonly Dictionary<string, (TextBlock Value, TextBlock Sub)> _rows = new();
-        public readonly StackPanel Panel = new();
+        public readonly UniformGrid Panel;
 
-        public SmallRows(IReadOnlyList<string> ids, bool withSub = true)
+        /// <param name="columns">2 fills left to right, so short "label  value" pairs don't make a long thin list.</param>
+        public SmallRows(IReadOnlyList<string> ids, bool withSub = true, int columns = 1)
         {
-            foreach (var id in ids)
+            Panel = new UniformGrid { Columns = columns };
+            for (int i = 0; i < ids.Count; i++)
             {
-                var g = new Grid { Margin = new Thickness(0, 2, 0, 2) };
+                var id = ids[i];
+                // A gap between the columns: the left cell stops short, the right one starts late.
+                double gap = columns > 1 ? 9 : 0;
+                bool leftCol = i % columns == 0, rightCol = i % columns == columns - 1;
+                var g = new Grid { Margin = new Thickness(leftCol ? 0 : gap, 2, rightCol ? 0 : gap, 2) };
                 g.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                 g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 g.Children.Add(Ui.T(12, Ui.Accent(id), text: Ui.Label(id)));
@@ -178,12 +200,13 @@ sealed class HeroView : WidgetView
     }
 }
 
-/// <summary>Ring dials for the main stats, bars for the rest.</summary>
+/// <summary>Ring dials for the main stats; bars for the small ones that fill up (<see cref="Catalog.Bars"/>), numbers for the rest.</summary>
 sealed class GaugesView : WidgetView
 {
     const double Size = 104, Thick = 9;
     readonly Dictionary<string, (Path Arc, TextBlock Value, TextBlock Unit, TextBlock Sub)> _rings = new();
     readonly Dictionary<string, (Border Fill, TextBlock Value)> _bars = new();
+    readonly SmallRows? _numbers;
 
     public GaugesView(IReadOnlyList<string> big, IReadOnlyList<string> small)
     {
@@ -220,7 +243,7 @@ sealed class GaugesView : WidgetView
         if (small.Count > 0)
         {
             root.Children.Add(Ui.Divider());
-            foreach (var id in small)
+            foreach (var id in small.Where(Catalog.Bars.Contains))
             {
                 var g = new Grid { Margin = new Thickness(0, 4, 0, 4) };
                 g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(96) });
@@ -241,6 +264,13 @@ sealed class GaugesView : WidgetView
                 root.Children.Add(g);
                 _bars[id] = (fill, value);
                 bar.SizeChanged += (_, _) => fill.Tag = bar.ActualWidth;
+            }
+            var numbers = small.Where(id => !Catalog.Bars.Contains(id)).ToList();
+            if (numbers.Count > 0)
+            {
+                if (_bars.Count > 0) root.Children.Add(Ui.Divider());
+                _numbers = new SmallRows(numbers);
+                root.Children.Add(_numbers.Panel);
             }
         }
         Root = root;
@@ -279,6 +309,7 @@ sealed class GaugesView : WidgetView
             value.Text = Fmt.WithUnit(x.Value, x.Unit);
             value.Foreground = Ui.ForLevel(Shown(x));
         }
+        _numbers?.Update(m);
     }
 }
 
@@ -326,7 +357,7 @@ sealed class GraphsView : WidgetView
 
         if (small.Count > 0)
         {
-            _small = new SmallRows(small, withSub: false);
+            _small = new SmallRows(small, withSub: false, columns: 2);
             _small.Panel.Margin = new Thickness(4, 2, 4, 0);
             root.Children.Add(_small.Panel);
         }
