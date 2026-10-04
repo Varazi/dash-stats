@@ -66,6 +66,9 @@ h1 em { font-style: normal; background: linear-gradient(90deg, var(--cpu), var(-
 .btn-tip { background: var(--fps); color: #1B1500; }
 .btn-tip:hover { background: #FFE19A; color: #1B1500; }
 .fine { font-family: var(--mono); font-size: 13px; color: var(--dim); margin-top: 16px; }
+.fine-tip { color: var(--fps); }
+.nav-tip { display: inline-flex; align-items: center; gap: 6px; color: var(--fps) !important; }
+.nav-tip svg { width: 16px; height: 16px; }
 .stage { display: grid; justify-items: center; gap: 12px; }
 .stage .tag { font-family: var(--mono); font-size: 12px; color: var(--soft); }
 
@@ -148,6 +151,8 @@ input[type=range] { width: 100%; accent-color: var(--net); }
 #get p { color: var(--soft); margin: 0; }
 .get-actions { display: grid; gap: 10px; margin: 22px 0 16px; }
 .get-actions .btn { justify-content: center; }
+.get-tips { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
+@media (max-width: 420px) { .get-tips { grid-template-columns: 1fr; } }
 .get-fine { font-size: 13.5px; }
 .get-x { position: absolute; top: 10px; right: 12px; margin: 0; }
 .get-x button { background: none; border: 0; color: var(--soft); font-size: 26px; line-height: 1; cursor: pointer; padding: 4px 8px; }
@@ -252,6 +257,7 @@ footer a { color: var(--soft); }
     releases: "https://github.com/Varazi/dash-stats/releases",
     github:   "https://github.com/Varazi/dash-stats",
     donate:   "",   // OWNER: one-time Stripe Payment Link ("customer chooses what to pay", $5 suggested)
+    tip5:     "",   // OWNER (optional): a fixed $5 Stripe link. Empty = the "Tip $5" button uses the link above
     monthly:  ""    // OWNER: monthly Stripe Payment Link ($3/month)
   };
   // Tip: in Stripe, set the one-time link's "after payment" page to the download link above,
@@ -274,6 +280,7 @@ footer a { color: var(--soft); }
       <a href="#install">Install</a>
       <a href="#faq">FAQ</a>
       <a href="#" data-link="github">GitHub</a>
+      <a href="#tip" class="nav-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a3 3 0 0 1 0 6h-1"/><path d="M5 8h12v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"/><path d="M8 4c0-1 .7-1.5 1.5-1.5S11 3 11 4"/><path d="M12 4c0-1 .7-1.5 1.5-1.5S15 3 15 4"/></svg>Buy me a coffee</a>
       <a class="btn btn-glass" style="padding:8px 16px;font-size:15px" href="#" data-link="download">Download</a>
     </nav>
   </header>
@@ -291,7 +298,7 @@ footer a { color: var(--soft); }
           </a>
           <a class="btn btn-glass" href="#" data-link="github">View the source</a>
         </div>
-        <p class="fine">v0.3.0 · one .exe · nothing else to install</p>
+        <p class="fine">v0.3.0 · one .exe · nothing else to install · free, or <a href="#tip" class="fine-tip">buy me a coffee</a></p>
       </div>
       <div class="stage">
         <div class="wfit" id="hero-widget"></div>
@@ -416,13 +423,13 @@ footer a { color: var(--soft); }
 
     <div class="tip" id="tip">
       <div>
-        <h2>Buy me a beer.</h2>
+        <h2>Buy me a coffee.</h2>
         <p>DashStats is free and always will be. If it's earned a spot on your desktop, a tip helps pay for the next thing on the list: shareable themes, picking any stat, and multi-monitor support.</p>
       </div>
       <div style="display:grid;gap:10px;justify-items:center">
       <a class="btn btn-tip" href="#" data-link="donate">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a3 3 0 0 1 0 6h-1"/><path d="M5 8h12v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"/><path d="M8 4c0-1 .7-1.5 1.5-1.5S11 3 11 4"/><path d="M12 4c0-1 .7-1.5 1.5-1.5S15 3 15 4"/></svg>
-        Leave a tip
+        Buy me a coffee
       </a>
       <a href="#" data-link="monthly" class="monthly" style="font-size:14px;color:var(--soft)">or support monthly · $3/mo</a>
       </div>
@@ -458,7 +465,10 @@ footer a { color: var(--soft); }
   <h2 id="get-title">DashStats is free.</h2>
   <p>No trial, no catch, no account. If you'd like to chip in, a few dollars helps keep it updated. Totally optional.</p>
   <div class="get-actions">
-    <a class="btn btn-tip" id="get-tip" href="#" data-link="donate">Tip $5 and download</a>
+    <div class="get-tips" id="get-tip">
+      <a class="btn btn-tip" href="#" data-link="tip5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a3 3 0 0 1 0 6h-1"/><path d="M5 8h12v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"/><path d="M8 4c0-1 .7-1.5 1.5-1.5S11 3 11 4"/><path d="M12 4c0-1 .7-1.5 1.5-1.5S15 3 15 4"/></svg>Tip $5 and download</a>
+      <a class="btn btn-glass" href="#" data-link="donate">Other amount</a>
+    </div>
     <a class="btn btn-glass" id="get-free" href="#" data-link="download">Download free</a>
   </div>
   <p class="get-fine">Windows 10 &amp; 11, 64-bit · one .exe · <a href="#" data-link="releases">all versions</a><span id="get-monthly"> · or <a href="#" data-link="monthly">support monthly</a></span></p>
@@ -731,6 +741,7 @@ footer a { color: var(--soft); }
 (function () {
   // links
   var links = window.DASHSTATS_LINKS || {};
+  if (!links.tip5) links.tip5 = links.donate;
   document.querySelectorAll("[data-link]").forEach(function (a) {
     var url = links[a.getAttribute("data-link")];
     if (url) { a.href = url; a.target = "_blank"; a.rel = "noopener"; }
