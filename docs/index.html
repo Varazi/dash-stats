@@ -852,7 +852,7 @@ footer a { color: var(--soft); }
     }
     dots.forEach(function (p, k) { ctx.fillStyle = 'rgba(' + k + ')'; ctx.fill(p); });
   }
-  var SPEED = 0.65;   // 35% slower than the first version
+  var SPEED = 0.42;   // 35% slower, twice: 0.65 x 0.65 of the first version
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches, t0 = performance.now(), last = 0;
   function draw(now) {
     try { if (now - last > 33) { last = now; frame(20 + (now - t0) / 1000 * SPEED); } } catch (e) { }   // never let one bad frame stop it
