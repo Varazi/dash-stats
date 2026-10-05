@@ -39,14 +39,22 @@ every value is written to `snapshot.txt` each second.
 
 ## Ship a new version
 
-1. Bump `<Version>` in `src/DashStats/DashStats.csproj` and commit.
-2. Tag and push: `git tag v0.3.0` then `git push && git push --tags` (the tag must match the version).
-3. The [Release workflow](.github/workflows/release.yml) builds the exe on GitHub and attaches it to a new
-   release. `releases/latest` moves to it automatically, so the website's download button needs no change.
-4. Installed copies (0.3.0 and later) notice the new release within a few hours and offer to update.
-   This needs the repo (or at least its releases) to be public; while it's private the check quietly fails.
+1. Bump `<Version>` in `src/DashStats/DashStats.csproj` (for example `0.3.0` → `0.3.1`) and commit.
+2. Tag and push: `git tag v0.3.1`, then `git push && git push --tags`. The tag must match the version, or the
+   build stops with an error.
+3. The [Release workflow](.github/workflows/release.yml) builds `DashStats.exe` and `DashStats.zip` on GitHub
+   (about 2 minutes) and publishes them as the new latest release. Edit the release notes on GitHub afterwards.
+4. Installed copies (0.3.0 and later) check about 2 minutes after they start and every 6 hours after that, then
+   ask: Update now / In 4 hours / In a week / Don't ask again. Downloads are checked against GitHub's SHA-256.
+   The website's Download button always points at the latest release, so it needs no change.
 
-To do it by hand instead: `.\build.ps1`, then `gh release create v0.3.0 dist\DashStats.exe --generate-notes`.
+Notes:
+- Mark a release as a **pre-release** to test it without offering it to everyone; the updater ignores
+  pre-releases and drafts.
+- Copies older than 0.3.0 have no updater and must be updated by hand once.
+- Website changes (`docs/`) go live a minute after they're pushed and don't need a release.
+
+To do it by hand instead: `.\build.ps1`, then `gh release create v0.3.1 dist\DashStats.exe --generate-notes`.
 
 ## Website
 
