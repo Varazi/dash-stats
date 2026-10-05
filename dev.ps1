@@ -1,6 +1,6 @@
 # Rebuild and hot-swap the installed copy (uses the "DashStats" startup task to stop and start it).
 # Run it from an ADMIN terminal: the install lives in Program Files, which only admins can write to.
-# Needs DashStats installed once via first-run setup ("Yes"), and DashStats started by that task,
+# Needs DashStats installed once via first-run setup ("Yes").
 # Any other running copy is stopped first.
 $ErrorActionPreference = 'Stop'
 $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
