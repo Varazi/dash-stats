@@ -267,8 +267,6 @@ public partial class MainWindow : Window
         Body.Visibility = list ? Visibility.Visible : Visibility.Collapsed;
         LookHost.Visibility = list ? Visibility.Collapsed : Visibility.Visible;
         ViewBtn.Text = S.Lite ? "FULL" : "LITE";
-        AllBtn.Text = S.ShowAll ? "MINE" : "ALL";
-        AllBtn.Visibility = S.Uses.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         UpdateVisibility();
         Reposition();
     }
@@ -279,7 +277,7 @@ public partial class MainWindow : Window
     WidgetView? _view;
 
     /// <summary>The raw list of every reading: when asked for, or before setup has picked anything.</summary>
-    bool ShowingList => S.ShowAll || S.Uses.Count == 0;
+    bool ShowingList => S.Uses.Count == 0;
 
     public void RebuildView()
     {
@@ -363,30 +361,16 @@ public partial class MainWindow : Window
     void ViewBtn_Down(object sender, MouseButtonEventArgs e) { e.Handled = true; _ctl.ToggleLite(); }
     void PinBtn_Down(object sender, MouseButtonEventArgs e) { e.Handled = true; _ctl.ToggleOverlay(); }
     void EditBtn_Down(object sender, MouseButtonEventArgs e) { e.Handled = true; _ctl.OpenSetup(); }
-    void AllBtn_Down(object sender, MouseButtonEventArgs e) { e.Handled = true; _ctl.ToggleShowAll(); }
 
     protected override void OnMouseRightButtonUp(MouseButtonEventArgs e)
     {
         base.OnMouseRightButtonUp(e);
         e.Handled = true;
 
-        RowUi? row = null;
-        for (var d = e.OriginalSource as DependencyObject; d is not null && row is null; d = VisualTreeHelper.GetParent(d))
-            row = (d as FrameworkElement)?.Tag as RowUi;
-
         var m = new ContextMenu();
-        if (row is not null)
-        {
-            string name = string.IsNullOrWhiteSpace(row.Data.Label) ? row.Data.Key : row.Data.Label.Trim();
-            m.Items.Add(Item($"Hide \"{name}\"", () => _ctl.HideRow(row.Data.Key)));
-        }
-        if (S.Hidden.Count > 0) m.Items.Add(Item($"Show hidden rows ({S.Hidden.Count})", _ctl.ShowAllRows));
-        if (m.Items.Count > 0) m.Items.Add(new Separator());
-
         m.Items.Add(Item("Change what I monitor…", _ctl.OpenSetup));
-        if (S.Uses.Count > 0) m.Items.Add(Item("Show every reading", _ctl.ToggleShowAll, S.ShowAll));
         m.Items.Add(Item("Lite view", _ctl.ToggleLite, S.Lite, "Ctrl+Alt+L"));
-        m.Items.Add(Item("Overlay on top", _ctl.ToggleOverlay, S.Overlay, "Ctrl+Alt+M"));
+        m.Items.Add(Item("Pin on top", _ctl.ToggleOverlay, S.Overlay, "Ctrl+Alt+M"));
         var see = new MenuItem { Header = "Overlay transparency" };
         foreach (var t in Controller.TransparencySteps)
             see.Items.Add(Item(Controller.TransparencyName(t), () => _ctl.SetOverlayTransparency(t), S.OverlayTransparency == t));
@@ -395,7 +379,15 @@ public partial class MainWindow : Window
         foreach (var (code, cname) in Controller.Corners)
             pos.Items.Add(Item(cname, () => _ctl.SetCorner(code), S.Corner == code));
         m.Items.Add(pos);
-        m.Items.Add(Item("Start with Windows", _ctl.ToggleStartup, S.StartWithWindows));
+        m.Items.Add(new Separator());
+        m.Items.Add(Item($"Check for updates… (v{Updater.CurrentText})", _ctl.CheckForUpdatesNow));
+        var settings = new MenuItem { Header = "Settings" };
+        settings.Items.Add(Item("Start with Windows", _ctl.ToggleStartup, S.StartWithWindows));
+        settings.Items.Add(Item("Check for updates automatically", _ctl.ToggleAutoUpdate, S.CheckForUpdates));
+        settings.Items.Add(Item("Open settings folder", _ctl.OpenDataFolder));
+        settings.Items.Add(new Separator());
+        settings.Items.Add(Item("Uninstall…", _ctl.Uninstall));
+        m.Items.Add(settings);
         m.Items.Add(new Separator());
         m.Items.Add(Item("Hide widget", _ctl.ToggleVisible, null, "Ctrl+Alt+H"));
         m.Items.Add(Item("Exit", _ctl.Exit));

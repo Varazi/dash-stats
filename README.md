@@ -24,12 +24,10 @@ Exit the running one from the tray icon first.
 | Action | How |
 |---|---|
 | Choose what to monitor and the look | **EDIT** in the widget header, or tray → *Change what I monitor…* |
-| Every reading vs. your picks | **ALL** / **MINE** in the header |
-| Pin on top of everything, click-through | `Ctrl+Alt+M` or the **PIN ON TOP** button |
+| Pin on top of everything, click-through | `Ctrl+Alt+M` or the **PIN** button. Unpin with `Ctrl+Alt+M` or tray → **Unpin widget** |
 | Full / lite view | `Ctrl+Alt+L` or the **LITE** button |
 | Hide / show | `Ctrl+Alt+H` or left-click the tray icon |
 | Move | Drag it. It snaps to the nearest corner. |
-| Prune a row | Right-click it → **Hide** (the tray menu brings hidden rows back) |
 
 ## Build
 

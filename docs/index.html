@@ -572,7 +572,7 @@ footer a { color: var(--soft); }
     }
     const head = el('div', 'w-head');
     head.appendChild(add(el('div', 'w-status'), el('div', 'w-dot', null, { background: LEVEL[level] }), el('div', 'w-stext', status)));
-    if (!overlay) { const b = el('div', 'w-btns'); for (const t of ['EDIT', 'ALL', view, 'PIN']) b.appendChild(el('div', 'w-btn', t)); head.appendChild(b); }
+    if (!overlay) { const b = el('div', 'w-btns'); for (const t of ['EDIT', view, 'PIN']) b.appendChild(el('div', 'w-btn', t)); head.appendChild(b); }
     if (body) return add(w, head, body);
     head.style.marginBottom = '0';
     return add(w, head);

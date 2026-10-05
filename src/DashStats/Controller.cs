@@ -8,6 +8,8 @@ public sealed class Controller(Settings s)
 {
     public Settings S { get; } = s;
     public MainWindow Win { get; set; } = null!;
+    /// <summary>Shows a Windows notification (set by App to the tray icon's).</summary>
+    public Action<string, string>? Notify { get; set; }
 
     public static readonly (string Code, string Name)[] Corners =
         [("TL", "Top left"), ("TR", "Top right"), ("BL", "Bottom left"), ("BR", "Bottom right")];
@@ -70,7 +72,6 @@ public sealed class Controller(Settings s)
         S.Uses = uses.ToList();
         S.MainUse = main;
         S.Look = look;
-        S.ShowAll = false;
         S.Save();
         Win.RebuildView();
         Win.ApplyMode();
@@ -86,13 +87,6 @@ public sealed class Controller(Settings s)
         Win.ApplyMode();
     }
 
-    public void ToggleShowAll()
-    {
-        S.ShowAll = !S.ShowAll;
-        S.Save();
-        Win.ApplyMode();
-    }
-
     public void ToggleOverlay()
     {
         S.Overlay = !S.Overlay;
@@ -100,6 +94,9 @@ public sealed class Controller(Settings s)
         if (!Win.IsVisible) Win.Show();
         Win.RebuildView(); // tiles and panels fade with the overlay transparency
         Win.ApplyMode();
+        if (S.Overlay)
+            Notify?.Invoke("DashStats is pinned on top",
+                "Clicks pass through it. To unpin, press Ctrl+Alt+M or right-click the tray icon → Unpin widget.");
     }
 
     public static readonly int[] TransparencySteps = [0, 20, 40, 60, 80, 100];
@@ -139,20 +136,6 @@ public sealed class Controller(Settings s)
         S.MarginX = S.MarginY = 16;
         S.Save();
         Win.Reposition();
-    }
-
-    public void HideRow(string key)
-    {
-        S.Hidden.Add(key);
-        S.Save();
-        Win.UpdateVisibility();
-    }
-
-    public void ShowAllRows()
-    {
-        S.Hidden.Clear();
-        S.Save();
-        Win.UpdateVisibility();
     }
 
     public void ToggleStartup()

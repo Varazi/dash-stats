@@ -38,14 +38,11 @@
                     <TextBlock x:Name="EditBtn" Text="EDIT" Style="{StaticResource HeaderBtn}"
                                ToolTip="Change what you monitor and how it looks"
                                MouseLeftButtonDown="EditBtn_Down" />
-                    <TextBlock x:Name="AllBtn" Text="ALL" Style="{StaticResource HeaderBtn}"
-                               ToolTip="Switch between your chosen stats and every reading"
-                               MouseLeftButtonDown="AllBtn_Down" />
                     <TextBlock x:Name="ViewBtn" Text="LITE" Style="{StaticResource HeaderBtn}"
                                ToolTip="Main stats only (Ctrl+Alt+L)"
                                MouseLeftButtonDown="ViewBtn_Down" />
                     <TextBlock x:Name="PinBtn" Text="PIN" Style="{StaticResource HeaderBtn}"
-                               ToolTip="Show above every window, click-through (Ctrl+Alt+M to undo)"
+                               ToolTip="Pin above every window, click-through. Unpin with Ctrl+Alt+M or the tray icon."
                                MouseLeftButtonDown="PinBtn_Down" />
                 </StackPanel>
             </Grid>

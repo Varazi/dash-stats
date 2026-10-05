@@ -53,6 +53,7 @@ public partial class App : Application
         ctl.Win = win;
         win.Show();
         _tray = new Tray(ctl);
+        ctl.Notify = _tray.Tip;
 
         _collector = new Collector(s);
         _collector.Updated += (rows, metrics) => Dispatcher.BeginInvoke(DispatcherPriority.Background, () => ctl.OnTick(rows, metrics));
