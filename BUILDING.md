@@ -31,7 +31,7 @@ That produces `dist\DashStats.exe`, roughly **174 MB**, self-contained: the .NET
 | `IncludeNativeLibrariesForSelfExtract` | `true` | native DLLs go inside the exe too |
 | `EnableCompressionInSingleFile` | `false` | compressed is ~78 MB but gets unpacked into RAM at startup; uncompressed is memory-mapped, so the running app is lighter |
 | `ApplicationManifest` | `app.manifest` | `requireAdministrator` + PerMonitorV2 DPI |
-| `Version` | `0.2.0` | bump it for every build you hand out; the installer uses it to offer an update |
+| `Version` | e.g. `0.3.1` | bump it for every release; the updater compares it with the latest GitHub release |
 
 `build.ps1` runs the same publish command and prints the size. It finds `dotnet` on PATH, or falls back to a per-user SDK in `%LOCALAPPDATA%\Microsoft\dotnet`.
 
@@ -63,6 +63,21 @@ At run time, `Setup.Extract()` writes an embedded file to `C:\Program Files\Dash
 ## Dev loop
 
 The installed copy lives in `C:\Program Files\DashStats\` and is started by a scheduled task named `DashStats` (run with highest privileges at sign-in). `dev.ps1` rebuilds, ends the task, copies the new exe over the installed one and starts the task again. Run it from an **admin terminal**: Program Files is admin-only on purpose, because the task starts the exe as admin. It needs DashStats to have been installed once via the first-run "Yes, set it up" path.
+
+## Releasing a new version
+
+1. Bump `<Version>` in `src/DashStats/DashStats.csproj` (for example `0.3.1` → `0.3.2`) and commit.
+2. Tag and push: `git tag v0.3.2`, then `git push && git push --tags`. The tag must match the version, or the build stops with an error.
+3. The [Release workflow](.github/workflows/release.yml) builds `DashStats.exe` and `DashStats.zip` on GitHub (about 2 minutes) and publishes them as the new latest release. Edit the release notes afterwards with `gh release edit v0.3.2 --notes-file …`.
+4. Installed copies (0.3.0 and later) check about 2 minutes after they start and every 6 hours after that, then ask: Update now / In 4 hours / In a week / Don't ask again. Downloads are checked against GitHub's SHA-256 digest. The website's Download button always points at the latest release, so it needs no change.
+
+To test a release without offering it to everyone, mark it as a **pre-release** (`gh release edit v0.3.2 --prerelease`): the updater ignores pre-releases and drafts. Copies older than 0.3.0 have no updater and must be updated by hand once.
+
+To release by hand instead: `.\build.ps1`, then `gh release create v0.3.2 dist\DashStats.exe --generate-notes`.
+
+## Website
+
+`docs/index.html` is the one-page site, served by GitHub Pages from `main` → `/docs`: one self-contained HTML file, no build step. Changes go live about a minute after they're pushed and don't need a release. The download, GitHub and Ko-fi URLs are set once in the `DASHSTATS_LINKS` block near the top. The widgets on the page are drawn live in the browser with example readings, matching the app's looks. An alternative aurora background is kept in `design/website-aurora.html`, and the images in `design/media-kit/` are used by the README and for sharing.
 
 ## Troubleshooting a build on a new PC
 

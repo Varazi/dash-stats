@@ -1,0 +1,45 @@
+name: Bug report
+description: Something isn't working, a reading looks wrong, or the app won't start.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you saw, and what you expected instead. A screenshot helps a lot.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen
+      description: The steps that lead to the problem, if you know them.
+  - type: input
+    id: version
+    attributes:
+      label: DashStats version
+      description: Right-click the tray icon → Check for updates… shows the version you have.
+      placeholder: "0.3.1"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: "Windows 11 24H2"
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: CPU and graphics card
+      description: Most sensor problems depend on the hardware.
+      placeholder: "Ryzen 7 7800X3D, RTX 4070"
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: |
+        Paste the end of `%APPDATA%\DashStats\log.txt` (type that path into File Explorer's address bar).
+        For a wrong or missing reading, also create an empty file named `debug.flag` in the same folder, wait a few seconds, and attach `snapshot.txt`.
+      render: text

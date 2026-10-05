@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Website and FAQ
+    url: https://varazi.github.io/dash-stats/
+    about: How DashStats works, and answers to common questions.

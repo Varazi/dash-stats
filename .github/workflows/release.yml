@@ -46,4 +46,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ github.ref_name }}" dist/DashStats.exe dist/DashStats.zip `
-            --title "DashStats ${{ github.ref_name }}" --generate-notes
+            --title "DashStats $('${{ github.ref_name }}'.TrimStart('v'))" --generate-notes

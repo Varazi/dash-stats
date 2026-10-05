@@ -1,79 +1,71 @@
 # DashStats
 
-A small desktop widget for PC health: CPU/GPU temps, clocks, load and power, RAM, disks, battery, FPS for the
-app in front, and network health (speed, ping, jitter, packet loss, retransmits, hiccups).
+**Your PC's vital signs, in the corner of your screen.** A small widget for Windows that shows temperatures, load, FPS and network health once a second, and tells you in plain words when something's off.
 
-**Website:** https://varazi.github.io/dash-stats/ · **Download:** [latest release](https://github.com/Varazi/dash-stats/releases/latest) · **Support it:** [buy me a coffee on Ko-fi](https://ko-fi.com/varazi)
+[**Download**](https://github.com/Varazi/dash-stats/releases/latest) · [Website](https://varazi.github.io/dash-stats/) · [Buy me a coffee](https://ko-fi.com/varazi)
 
-DashStats is free and open source (MIT). If it's useful to you, a tip helps keep it updated: one-time, any amount,
-or a small monthly contribution. It's entirely optional; there are no paid features.
+Free and open source (MIT). Windows 10 and 11, 64-bit.
+
+![DashStats on the desktop](design/media-kit/1-dashstats.png)
+
+## What it shows
+
+- **CPU:** load, temperature, clock speed, power, busiest core
+- **GPU:** load, temperature and hotspot, clocks, VRAM, power, fan, video encoder. NVIDIA, AMD and Intel.
+- **FPS** for the app in front: frame rate, 1% lows, frame time, stutters. Any game, any graphics card.
+- **Network:** speeds, ping, jitter, packet loss, router ping, retransmits, a log of hiccups
+- **Memory, disks, battery,** uptime and total power draw
+
+The header says what's wrong in words ("GPU temp: 86°C", "Network: drops on your Wi-Fi"). It pings both your router and the internet, so it can tell weak Wi-Fi from a bad internet provider.
+
+## It builds itself
+
+The first time you run it, it asks what you use the PC for (gaming, coding, hosting a server, AI training, streaming…) and picks the stats that matter for that. Then pick one of four looks. Switch any time with **EDIT**.
+
+![Four looks: Hero, Gauges, Graphs and Minimal](design/media-kit/2-four-looks.png)
+
+By default it sits on the desktop behind your windows. Pin it with `Ctrl+Alt+M` and it floats over everything, borderless games included, with clicks passing straight through. Choose how see-through it is, from solid to numbers only.
+
+![Pinned over a game](design/media-kit/3-overlay.png)
 
 ## Install
 
-Download `DashStats.exe` from the [latest release](https://github.com/Varazi/dash-stats/releases/latest) and
-double-click it. Nothing else is needed. If Windows says "Windows protected your PC", click **More info → Run
-anyway** (the build isn't code-signed yet). Click **Yes** at the admin prompt and **Yes** at setup. Setup installs
-the PawnIO sensor driver, copies DashStats to `C:\Program Files\DashStats`, starts it at sign-in and adds
-a Start menu shortcut.
+1. Download `DashStats.exe` from the [latest release](https://github.com/Varazi/dash-stats/releases/latest) and double-click it. Nothing else to install.
+2. If Windows says "Windows protected your PC", click **More info**, then **Run anyway**. The app isn't code-signed yet.
+3. Click **Yes** at the admin prompt (needed to read temperatures and frame rates), then **Yes** to set it up.
 
-To update later, run the newer `DashStats.exe` from anywhere and it offers to replace the installed copy.
-Exit the running one from the tray icon first.
+Setup copies DashStats to `C:\Program Files\DashStats`, starts it when you sign in, adds a Start menu shortcut and installs the PawnIO sensor driver if it's missing. DashStats checks for updates every few hours and asks before installing one. To remove it, use tray → *Settings* → *Uninstall…*.
 
 ## Controls
 
 | Action | How |
 |---|---|
 | Choose what to monitor and the look | **EDIT** in the widget header, or tray → *Change what I monitor…* |
-| Pin on top of everything, click-through | `Ctrl+Alt+M` or the **PIN** button. Unpin with `Ctrl+Alt+M` or tray → **Unpin widget** |
-| Full / lite view | `Ctrl+Alt+L` or the **LITE** button |
-| Hide / show | `Ctrl+Alt+H` or left-click the tray icon |
+| Pin over everything, click-through | `Ctrl+Alt+M` or **PIN**. Unpin with `Ctrl+Alt+M` or tray → *Unpin widget* |
+| Full or lite view | `Ctrl+Alt+L` or the **LITE** / **FULL** button |
+| Hide or show | `Ctrl+Alt+H` or left-click the tray icon |
 | Move | Drag it. It snaps to the nearest corner. |
 
-## Build
+Right-click the tray icon (near the clock) for everything else.
 
-- `.\build.ps1` builds `dist\DashStats.exe`, a self-contained single file.
-- `.\dev.ps1` (from an admin terminal) rebuilds and restarts the installed copy.
+## Privacy
 
-Settings and log live in `%APPDATA%\DashStats`. For troubleshooting, create `debug.flag` in that folder and
-every value is written to `snapshot.txt` each second.
+No account, no ads, no tracking. DashStats only goes online to ping `1.1.1.1` and your router (for the ping and packet-loss readings) and to check GitHub for new versions. Settings and logs stay on your PC in `%APPDATA%\DashStats`.
 
-## Ship a new version
+## Known limitations
 
-1. Bump `<Version>` in `src/DashStats/DashStats.csproj` (for example `0.3.0` → `0.3.1`) and commit.
-2. Tag and push: `git tag v0.3.1`, then `git push && git push --tags`. The tag must match the version, or the
-   build stops with an error.
-3. The [Release workflow](.github/workflows/release.yml) builds `DashStats.exe` and `DashStats.zip` on GitHub
-   (about 2 minutes) and publishes them as the new latest release. Edit the release notes on GitHub afterwards.
-4. Installed copies (0.3.0 and later) check about 2 minutes after they start and every 6 hours after that, then
-   ask: Update now / In 4 hours / In a week / Don't ask again. Downloads are checked against GitHub's SHA-256.
-   The website's Download button always points at the latest release, so it needs no change.
+- **Smart App Control** (on some newer Windows 11 PCs) blocks unsigned apps outright. Check Windows Security → App & browser control.
+- Exclusive-fullscreen games draw over every window. Use borderless or windowed fullscreen to see the pinned widget.
+- Without the PawnIO driver, CPU temperature and CPU power aren't available. Everything else still works.
 
-Notes:
-- Mark a release as a **pre-release** to test it without offering it to everyone; the updater ignores
-  pre-releases and drafts.
-- Copies older than 0.3.0 have no updater and must be updated by hand once.
-- Website changes (`docs/`) go live a minute after they're pushed and don't need a release.
+Found a bug? [Open an issue](https://github.com/Varazi/dash-stats/issues/new/choose). The bug report form explains how to attach the log.
 
-To do it by hand instead: `.\build.ps1`, then `gh release create v0.3.1 dist\DashStats.exe --generate-notes`.
+## Building from source
 
-## Website
+See [BUILDING.md](BUILDING.md) for the toolchain, the build commands, how releases are made and how the bundled tools get in. In short: install the .NET 10 SDK and run `.\build.ps1`.
 
-`docs/index.html` is the one-page site, served by GitHub Pages: one self-contained HTML file, no build step. The
-download, GitHub and tip (Stripe Payment Link) URLs are set once in the `DASHSTATS_LINKS` block near the top.
-The widgets on the page are drawn live in the browser with example readings, matching the app's looks.
-The background is a rolling wave of dots joined into a faint wireframe mesh, with soft smoke in the bottom corners.
-Headings use Sora. An alternative aurora background
-is kept in `design/website-aurora.html`.
+## Credits
 
-## Notes
+Sensors come from [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) with the [PawnIO](https://github.com/namazso/PawnIO) driver; frame rates from Intel's [PresentMon](https://github.com/GameTechDev/PresentMon). Their licenses are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
-- Windows **Smart App Control** blocks the unsigned exe. Turn it off, or code-sign the build.
-- Sensors come from LibreHardwareMonitor (plus the PawnIO driver), FPS from Intel PresentMon. Both are
-  bundled inside the exe.
-- Exclusive-fullscreen games draw over every window. Use borderless/windowed fullscreen to see the overlay.
-
-## More
-
-- [BUILDING.md](BUILDING.md): toolchain, the exact publish command, how PresentMon and PawnIO are bundled.
-- [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md): licenses of bundled components.
-- [LICENSE](LICENSE): MIT.
+DashStats is released under the [MIT license](LICENSE).
