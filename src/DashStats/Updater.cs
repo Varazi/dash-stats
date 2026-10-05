@@ -73,6 +73,15 @@ static class Updater
         {
             Release? r;
             try { r = await Latest(); }
+            catch (HttpRequestException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                // GitHub has no published release to compare with (none yet, or the repo isn't public).
+                Log.Write("Update check: no published release found");
+                if (manual)
+                    MessageBox.Show($"No published versions were found on GitHub, so there's nothing newer than the one you have ({CurrentText}).",
+                        "DashStats", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
             catch (Exception e)
             {
                 Log.Write("Update check failed: " + e.Message);
