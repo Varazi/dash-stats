@@ -37,7 +37,11 @@ kbd { padding: 1px 7px 2px; border: 1px solid var(--rule); border-bottom-width: 
 #smoke { position: fixed; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); display: block; z-index: 0; pointer-events: none; filter: blur(22px); }
 h1 { font-weight: 700; letter-spacing: -.045em; }
 h2 { font-weight: 700; letter-spacing: -.035em; }
-.veil { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(9,11,16,0) 0%, rgba(9,11,16,.35) 45%, rgba(9,11,16,.78) 100%); }
+/* the content column gets its own soft dark fog so text and cards read clearly over the moving mesh; the mesh stays bright at the sides */
+.veil { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(9,11,16,0) calc(50% - 760px), rgba(9,11,16,.5) calc(50% - 520px), rgba(9,11,16,.5) calc(50% + 520px), rgba(9,11,16,0) calc(50% + 760px)),
+    linear-gradient(180deg, rgba(9,11,16,0) 0%, rgba(9,11,16,.35) 45%, rgba(9,11,16,.78) 100%); }
 .page { position: relative; z-index: 1; max-width: 1160px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 20px 56px; }
 
 /* header */
@@ -92,7 +96,7 @@ h2 { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 4vw, 
 .chip { font-family: var(--mono); font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,.06); }
 
 .looks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 32px; }
-.look { display: grid; gap: 14px; justify-items: start; }
+.look { display: grid; gap: 14px; justify-items: start; align-content: start; justify-self: center; max-width: 100%; }
 .look h3 { font-family: var(--display); font-weight: 700; font-size: 22px; margin: 0; }
 .look h3 span { font-family: var(--body); font-weight: 400; font-size: 15px; color: var(--soft); margin-left: 8px; }
 
@@ -102,10 +106,10 @@ h2 { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 4vw, 
 .keys { display: grid; gap: 10px; margin-top: 22px; }
 .keys div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 12px; color: var(--soft); font-size: 15px; }
 
-.game { border-radius: 18px; overflow: hidden; position: relative; padding: 22px; min-height: 300px; display: grid; align-content: end; justify-items: end;
+.game { border-radius: 18px; overflow: hidden; position: relative; padding: 22px; min-height: 300px; display: grid; align-content: start; justify-items: end;
   background: radial-gradient(70% 90% at 25% 15%, #F2B45A 0%, rgba(242,180,90,0) 60%), linear-gradient(160deg, #6B3A22 0%, #A55A2C 30%, #2E5052 65%, #142123 100%); }
-.game::before { content: ""; position: absolute; inset: 55% 0 0 0; background: linear-gradient(180deg, transparent, rgba(10,14,15,.65)); }
-.game .wfit { position: relative; }
+.game::before { content: ""; position: absolute; inset: 55% 0 0 0; background: linear-gradient(180deg, transparent, rgba(10,14,15,.65)); pointer-events: none; }
+.game > * { position: relative; }
 .slider { display: grid; gap: 8px; margin-top: 18px; }
 .slider label { font-family: var(--mono); font-size: 13px; color: var(--soft); display: flex; justify-content: space-between; }
 .slider label b { color: var(--ink); }
@@ -141,7 +145,10 @@ input[type=range] { width: 100%; accent-color: var(--net); }
 .faq .a { color: var(--soft); font-size: 15.5px; padding-bottom: 14px; display: grid; gap: 8px; }
 .faq .a p { margin: 0; }
 
-.tip { margin-top: 80px; border-radius: 28px; padding: clamp(28px, 5vw, 56px); background: linear-gradient(135deg, rgba(255,209,102,.16), rgba(255,159,110,.08) 50%, rgba(12,15,20,.6)); border: 1px solid rgba(255,209,102,.28); backdrop-filter: blur(16px); display: grid; grid-template-columns: minmax(0, 1.4fr) auto; gap: 28px; align-items: center; }
+.tip { margin-top: 80px; border-radius: 22px; padding: clamp(24px, 4vw, 40px); background: linear-gradient(135deg, rgba(255,209,102,.06), rgba(12,15,20,.55) 60%); border: 1px solid var(--rule); backdrop-filter: blur(16px); display: grid; grid-template-columns: minmax(0, 1.4fr) auto; gap: 28px; align-items: center; }
+.tip .kicker { margin-bottom: 12px; }
+.tip .kicker::before { background: var(--fps); box-shadow: 0 0 12px var(--fps); }
+.tip h2 { font-size: clamp(24px, 3vw, 32px); }
 .tip p { color: var(--soft); margin: 10px 0 0; max-width: 36em; }
 
 #get { max-width: min(480px, calc(100% - 32px)); width: 100%; padding: 30px 28px 24px; border-radius: 22px; border: 1px solid rgba(255,255,255,.14);
@@ -206,6 +213,8 @@ footer a { color: var(--soft); }
 .w .strip { border-top: 1px solid #1F242C; border-bottom: 1px solid #1F242C; padding: 10px 0; display: grid; }
 .w .strip .line { display: flex; align-items: flex-end; }
 .w .strip .val { font-size: 20px; font-weight: 600; }
+.w .mini-extras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 14px; margin-top: 8px; font-size: 11px; color: #7D8796; }
+.w .mini-extras div { display: flex; justify-content: space-between; gap: 8px; min-width: 0; }
 .w .strip .unit { font-size: 11px; color: #8B94A3; margin: 0 0 3px 3px; }
 /* fits a phone: the widget is drawn at real size and shrinks only when it has to */
 .wfit { max-width: 100%; }
@@ -228,6 +237,7 @@ footer a { color: var(--soft); }
 .cfg-stage.game .cfg-cap { color: #F3E6D8; }
 .cfg-cap b { color: var(--ink); }
 .cfg-see { display: grid; gap: 6px; width: 100%; max-width: 360px; }
+.cfg-see[hidden] { display: none; }
 .cfg-see label { font-size: 13px; color: #F3E6D8; display: flex; justify-content: space-between; }
 .cfg-see input { width: 100%; accent-color: #45D0E0; }
 @media (max-width: 980px) { .cfg { grid-template-columns: minmax(0, 1fr); } }
@@ -418,7 +428,8 @@ footer a { color: var(--soft); }
 
     <div class="tip" id="tip">
       <div>
-        <h2>Buy me a coffee.</h2>
+        <div class="kicker">Support open source</div>
+        <h2>Back the people who make small, useful things like this.</h2>
         <p>DashStats is free and always will be. If it's earned a spot on your desktop, a tip helps pay for the next thing on the list: shareable themes, picking any stat, and multi-monitor support.</p>
       </div>
       <div style="display:grid;gap:10px;justify-items:center">
@@ -640,7 +651,7 @@ footer a { color: var(--soft); }
       if (small.length) { const s = smallRows(small, false, 2); s.style.margin = '2px 4px 0'; root.appendChild(s); }
       return root;
     },
-    minimal(big) {
+    minimal(big, small = []) {
       const root = el('div');
       const strip = el('div', 'strip', null, { gridTemplateColumns: `repeat(${Math.max(1, big.length)}, minmax(0, 1fr))` });
       for (const id of big) {
@@ -650,6 +661,15 @@ footer a { color: var(--soft); }
           el('div', 'tx', label(id), { fontSize: '10px', color: accent(id) })));
       }
       root.appendChild(strip);
+      if (small.length) {
+        const g = el('div', 'mini-extras');
+        for (const id of small) {
+          const x = get(id), l = shown(x.l);
+          g.appendChild(add(el('div', 'mono'), el('span', null, label(id)),
+            el('span', null, withUnit(x.v, x.u), { color: l === 'Warn' || l === 'Bad' ? LEVEL[l] : '#B8C0CC' })));
+        }
+        root.appendChild(g);
+      }
       return root;
     },
   };
@@ -712,7 +732,7 @@ footer a { color: var(--soft); }
 
     const m = mount(widgetHost, () => {
       const big = PRESETS.find(p => p[0] === st.use)[2];
-      const small = st.lite || st.look === 'minimal' ? [] : EXTRA.filter(id => !big.includes(id)).slice(0, st.look === 'graphs' ? 8 : 5);
+      const small = st.lite ? [] : EXTRA.filter(id => !big.includes(id)).slice(0, { graphs: 8, minimal: 6 }[st.look] || 5);
       return frame(st.lite ? 380 : 400, looks[st.look](big, small), { overlay: st.overlay, see: st.see, view: st.lite ? 'FULL' : 'LITE' });
     });
     function update() {

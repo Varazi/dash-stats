@@ -63,8 +63,13 @@ public static class Catalog
         ("minimal", "Minimal", "Quiet, text only"),
     ];
 
+    /// <summary>General stats that top up the small rows, so the full view always shows more than lite.</summary>
+    static readonly string[] Extras = ["cpu", "gpu", "ram", "hottest", "down", "up", "ping", "fps", "uptime"];
+    const int MinSmall = 5;
+
     /// <summary>
     /// The main use supplies the big stats; every other ticked use adds its stats as small rows (no repeats).
+    /// With few or no other uses ticked, general extras fill the small rows up to <see cref="MinSmall"/>.
     /// </summary>
     public static (List<string> Big, List<string> Small) Compose(ICollection<string> uses, string? main)
     {
@@ -75,6 +80,8 @@ public static class Catalog
         foreach (var p in chosen.Where(p => p != mainPreset))
             foreach (var id in p.Big.Where(Applies))
                 if (!big.Contains(id) && !small.Contains(id)) small.Add(id);
+        foreach (var id in Extras)
+            if (small.Count < MinSmall && !big.Contains(id) && !small.Contains(id)) small.Add(id);
         return (big, small);
     }
 
