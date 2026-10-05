@@ -3,7 +3,7 @@
 A small desktop widget for PC health: CPU/GPU temps, clocks, load and power, RAM, disks, battery, FPS for the
 app in front, and network health (speed, ping, jitter, packet loss, retransmits, hiccups).
 
-**Website:** https://varazi.github.io/dash-stats/ · **Download:** [latest release](https://github.com/Varazi/dash-stats/releases/latest) · **Support it:** [buy me a coffee](https://varazi.github.io/dash-stats/#tip)
+**Website:** https://varazi.github.io/dash-stats/ · **Download:** [latest release](https://github.com/Varazi/dash-stats/releases/latest) · **Support it:** [buy me a coffee on Ko-fi](https://ko-fi.com/varazi)
 
 DashStats is free and open source (MIT). If it's useful to you, a tip helps keep it updated: one-time, any amount,
 or a small monthly contribution. It's entirely optional; there are no paid features.
