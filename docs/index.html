@@ -51,6 +51,9 @@ h2 { font-weight: 700; letter-spacing: -.035em; }
 .top nav { display: flex; gap: 6px 22px; flex-wrap: wrap; align-items: center; font-size: 15px; }
 .top nav a { color: var(--soft); text-decoration: none; }
 .top nav a:hover { color: var(--ink); }
+.nav-tip { display: inline-flex; align-items: center; }
+.nav-tip svg { width: 18px; height: 18px; }
+.top nav a.nav-tip:hover { color: var(--fps); }
 
 /* hero */
 .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 48px; align-items: center; padding-block: 72px 64px; }
@@ -71,8 +74,6 @@ h1 em { font-style: normal; background: linear-gradient(90deg, var(--cpu), var(-
 .btn-tip:hover { background: #FFE19A; color: #1B1500; }
 .fine { font-family: var(--mono); font-size: 13px; color: var(--dim); margin-top: 16px; }
 .fine-tip { color: var(--fps); }
-.nav-tip { display: inline-flex; align-items: center; gap: 6px; color: var(--fps) !important; }
-.nav-tip svg { width: 16px; height: 16px; }
 .stage { display: grid; justify-items: center; gap: 12px; }
 .stage .tag { font-family: var(--mono); font-size: 12px; color: var(--soft); }
 
@@ -95,7 +96,8 @@ h2 { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 4vw, 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { font-family: var(--mono); font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,.06); }
 
-.looks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 32px; }
+.looks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 32px; align-items: start; }
+.looks-col { display: grid; gap: 40px; min-width: 0; }
 .look { display: grid; gap: 14px; justify-items: start; align-content: start; justify-self: center; max-width: 100%; }
 .look h3 { font-family: var(--display); font-weight: 700; font-size: 22px; margin: 0; }
 .look h3 span { font-family: var(--body); font-weight: 400; font-size: 15px; color: var(--soft); margin-left: 8px; }
@@ -285,7 +287,7 @@ footer a { color: var(--soft); }
       <a href="#install">Install</a>
       <a href="#faq">FAQ</a>
       <a href="#" data-link="github">GitHub</a>
-      <a href="#" data-link="donate" class="nav-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a3 3 0 0 1 0 6h-1"/><path d="M5 8h12v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"/><path d="M8 4c0-1 .7-1.5 1.5-1.5S11 3 11 4"/><path d="M12 4c0-1 .7-1.5 1.5-1.5S15 3 15 4"/></svg>Buy me a coffee</a>
+      <a href="#" data-link="donate" class="nav-tip" aria-label="Buy me a coffee" title="Buy me a coffee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a3 3 0 0 1 0 6h-1"/><path d="M5 8h12v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"/><path d="M8 4c0-1 .7-1.5 1.5-1.5S11 3 11 4"/><path d="M12 4c0-1 .7-1.5 1.5-1.5S15 3 15 4"/></svg></a>
       <a class="btn btn-glass" style="padding:8px 16px;font-size:15px" href="#" data-link="download">Download</a>
     </nav>
   </header>
@@ -303,7 +305,7 @@ footer a { color: var(--soft); }
           </a>
           <a class="btn btn-glass" href="#" data-link="github">View the source</a>
         </div>
-        <p class="fine">v0.3.0 · free, or <a href="#" data-link="donate" class="fine-tip">buy me a coffee</a></p>
+        <p class="fine">v0.3.1 · open source · <a href="#" data-link="donate" class="fine-tip">buy me a coffee</a></p>
       </div>
       <div class="stage">
         <div class="wfit" id="hero-widget"></div>
@@ -435,7 +437,7 @@ footer a { color: var(--soft); }
       <div style="display:grid;gap:10px;justify-items:center">
       <a class="btn btn-tip" href="#" data-link="donate">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a3 3 0 0 1 0 6h-1"/><path d="M5 8h12v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"/><path d="M8 4c0-1 .7-1.5 1.5-1.5S11 3 11 4"/><path d="M12 4c0-1 .7-1.5 1.5-1.5S15 3 15 4"/></svg>
-        Buy me a coffee
+        Buy me a coffee?
       </a>
       <span style="font-size:14px;color:var(--soft)">any amount, once or monthly, on Ko-fi</span>
       </div>
@@ -795,16 +797,18 @@ footer a { color: var(--soft); }
     c.appendChild(chips); ug.appendChild(c);
   });
 
-  var LOOKS = [['hero', 'Hero numbers', 'big bold figures', ['cpu', 'gpu', 'ram', 'down']], ['gauges', 'Gauges', 'dials, like a car', ['cpu', 'gpu', 'ram', 'core']],
-               ['graphs', 'Graphs', 'live history lines', ['cpu', 'gpu', 'down', 'ping']], ['minimal', 'Minimal', 'quiet, text only', ['cpu', 'gpu', 'ram', 'ping']]];
-  var lg = document.getElementById('looks-grid');
-  LOOKS.forEach(function (l) {
+  // every look shows the same stats (the Coding & builds preset), as in the app
+  var LOOKS = [['hero', 'Hero numbers', 'big bold figures'], ['gauges', 'Gauges', 'dials, like a car'],
+               ['graphs', 'Graphs', 'live history lines'], ['minimal', 'Minimal', 'quiet, text only']];
+  // two columns, Hero over Gauges and Graphs over Minimal, so the column heights come out about even
+  var lg = document.getElementById('looks-grid'), cols = [0, 1].map(function () { var c = document.createElement('div'); c.className = 'looks-col'; lg.appendChild(c); return c; });
+  LOOKS.forEach(function (l, i) {
     var f = document.createElement('div'); f.className = 'look';
     var h = document.createElement('h3'); h.textContent = l[1];
     var s = document.createElement('span'); s.textContent = l[2]; h.appendChild(s);
     var host = document.createElement('div'); host.className = 'wfit';
-    f.append(h, host); lg.appendChild(f);
-    D.mount(host, function () { return D.frame(380, D.looks[l[0]](l[3], []), { view: 'FULL' }); });
+    f.append(h, host); cols[i < 2 ? 0 : 1].appendChild(f);
+    D.mount(host, function () { return D.frame(380, D.looks[l[0]](BIG, []), { view: 'FULL' }); });
   });
 
   var st = document.getElementById('statuses');
