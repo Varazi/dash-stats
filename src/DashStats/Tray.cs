@@ -44,7 +44,7 @@ sealed class Tray : IDisposable
         Check("Lite view", "Ctrl+Alt+L", s.Lite, _c.ToggleLite);
         if (!s.Overlay) Check("Pin on top", "Ctrl+Alt+M", false, _c.ToggleOverlay);
 
-        var see = new Forms.ToolStripMenuItem("Overlay transparency");
+        var see = new Forms.ToolStripMenuItem("Transparency");
         foreach (var t in Controller.TransparencySteps)
             see.DropDownItems.Add(new Forms.ToolStripMenuItem(Controller.TransparencyName(t), null, (_, _) => _c.SetOverlayTransparency(t))
                 { Checked = s.OverlayTransparency == t });

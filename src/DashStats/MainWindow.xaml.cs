@@ -24,11 +24,8 @@ public partial class MainWindow : Window
         [Level.Warn] = Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0xC8, 0x57))),
         [Level.Bad] = Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x6B))),
     };
-    static readonly Brush DesktopBg = Freeze(new SolidColorBrush(Color.FromArgb(0xE0, 0x0E, 0x11, 0x16)));
-    static readonly Brush DesktopBorder = Freeze(new SolidColorBrush(Color.FromArgb(0x26, 0xFF, 0xFF, 0xFF)));
-
-    /// <summary>0..1 opacity of the overlay's surfaces, from the transparency setting.</summary>
-    double OverlaySurface => 1 - Math.Clamp(S.OverlayTransparency, 0, 100) / 100.0;
+    /// <summary>0..1 opacity of the widget's surfaces, from the transparency setting (desktop and pinned alike).</summary>
+    double Surface => 1 - Math.Clamp(S.OverlayTransparency, 0, 100) / 100.0;
 
     sealed class SectionUi
     {
@@ -252,16 +249,8 @@ public partial class MainWindow : Window
         }
 
         Buttons.Visibility = S.Overlay ? Visibility.Collapsed : Visibility.Visible;
-        if (S.Overlay)
-        {
-            Frame.Background = Freeze(new SolidColorBrush(Color.FromArgb((byte)(255 * OverlaySurface), 0x0E, 0x11, 0x16)));
-            Frame.BorderBrush = Freeze(new SolidColorBrush(Color.FromArgb((byte)(0x26 * OverlaySurface), 0xFF, 0xFF, 0xFF)));
-        }
-        else
-        {
-            Frame.Background = DesktopBg;
-            Frame.BorderBrush = DesktopBorder;
-        }
+        Frame.Background = Freeze(new SolidColorBrush(Color.FromArgb((byte)(255 * Surface), 0x0E, 0x11, 0x16)));
+        Frame.BorderBrush = Freeze(new SolidColorBrush(Color.FromArgb((byte)(0x26 * Surface), 0xFF, 0xFF, 0xFF)));
         bool list = ShowingList;
         Frame.Width = list ? (S.Lite ? LiteWidth : FullWidth) : (S.Lite ? LookLiteWidth : LookWidth);
         Body.Visibility = list ? Visibility.Visible : Visibility.Collapsed;
@@ -282,7 +271,7 @@ public partial class MainWindow : Window
     public void RebuildView()
     {
         var (big, small) = Catalog.Compose(S.Uses, S.MainUse);
-        Ui.SurfaceOpacity = S.Overlay ? OverlaySurface : 1;
+        Ui.SurfaceOpacity = Surface;
         try { _view = WidgetView.Create(S.Look, big, S.Lite ? [] : small); }
         finally { Ui.SurfaceOpacity = 1; }
         LookHost.Child = _view.Root;
@@ -371,7 +360,7 @@ public partial class MainWindow : Window
         m.Items.Add(Item("Change what I monitor…", _ctl.OpenSetup));
         m.Items.Add(Item("Lite view", _ctl.ToggleLite, S.Lite, "Ctrl+Alt+L"));
         m.Items.Add(Item("Pin on top", _ctl.ToggleOverlay, S.Overlay, "Ctrl+Alt+M"));
-        var see = new MenuItem { Header = "Overlay transparency" };
+        var see = new MenuItem { Header = "Transparency" };
         foreach (var t in Controller.TransparencySteps)
             see.Items.Add(Item(Controller.TransparencyName(t), () => _ctl.SetOverlayTransparency(t), S.OverlayTransparency == t));
         m.Items.Add(see);

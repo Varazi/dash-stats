@@ -92,7 +92,6 @@ public sealed class Controller(Settings s)
         S.Overlay = !S.Overlay;
         S.Save();
         if (!Win.IsVisible) Win.Show();
-        Win.RebuildView(); // tiles and panels fade with the overlay transparency
         Win.ApplyMode();
         if (S.Overlay)
             Notify?.Invoke("DashStats is pinned on top",
@@ -108,12 +107,10 @@ public sealed class Controller(Settings s)
         _ => $"{t}%",
     };
 
-    /// <summary>Saved even outside overlay mode, so it can be set up before switching to the overlay.</summary>
     public void SetOverlayTransparency(int percent)
     {
         S.OverlayTransparency = percent;
         S.Save();
-        if (!S.Overlay) return;
         Win.RebuildView();
         Win.ApplyMode();
     }

@@ -1,7 +1,7 @@
 # Rebuild and hot-swap the installed copy (uses the "DashStats" startup task to stop and start it).
 # Run it from an ADMIN terminal: the install lives in Program Files, which only admins can write to.
 # Needs DashStats installed once via first-run setup ("Yes"), and DashStats started by that task,
-# not by double-clicking the exe (the task can't stop a copy it didn't start; exit that one from the tray).
+# Any other running copy is stopped first.
 $ErrorActionPreference = 'Stop'
 $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $admin) { throw "Run dev.ps1 from an administrator terminal (the installed copy is in Program Files)." }
@@ -9,8 +9,10 @@ if (-not $admin) { throw "Run dev.ps1 from an administrator terminal (the instal
 
 schtasks /End /TN DashStats | Out-Null
 for ($i = 0; $i -lt 30 -and (Get-Process DashStats -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 500 }
+# A copy the task didn't start (e.g. one that restarted itself after an update) ignores /End; we're admin, so stop it.
 if (Get-Process DashStats -ErrorAction SilentlyContinue) {
-    throw "A DashStats copy the task didn't start is still running. Exit it from the tray icon and run this again."
+    Stop-Process -Name DashStats -Force
+    for ($i = 0; $i -lt 20 -and (Get-Process DashStats -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 500 }
 }
 
 $target = "$env:ProgramFiles\DashStats\DashStats.exe"

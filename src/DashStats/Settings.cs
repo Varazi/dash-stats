@@ -23,7 +23,7 @@ public sealed class Settings
 
     public bool Lite { get; set; }
     public bool Overlay { get; set; }
-    /// <summary>Overlay mode only: how see-through the background and panels are, 0 (solid) to 100 (numbers only).</summary>
+    /// <summary>How see-through the background and panels are, 0 (solid) to 100 (numbers only). Name kept for old settings files.</summary>
     public int OverlayTransparency { get; set; } = 20;
     public bool StartWithWindows { get; set; }
     public bool FirstRunDone { get; set; }
