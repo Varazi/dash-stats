@@ -102,10 +102,24 @@ h2 { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 4vw, 
 .statuses { display: grid; gap: 10px; justify-items: start; }
 .statuses .w { box-shadow: none; }
 .keys { display: grid; gap: 10px; margin-top: 22px; }
-.keys div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 12px; color: var(--soft); font-size: 15px; }
+.keys-hint { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); }
+.key { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 12px; align-items: center; text-align: left; font: inherit; font-size: 15px; color: var(--soft); background: none; border: 1px solid transparent; border-radius: 10px; padding: 6px 8px; margin: 0 -8px; cursor: pointer; }
+.key:hover { background: rgba(255,255,255,.05); color: var(--ink); }
+.key kbd { justify-self: start; transition: background .15s, border-color .15s; }
+.key[aria-pressed="true"] kbd { background: rgba(69,208,224,.14); border-color: var(--net); color: var(--ink); }
 
-.game { border-radius: 18px; overflow: hidden; position: relative; padding: 22px; min-height: 300px; display: grid; align-content: start; justify-items: end;
-  background: radial-gradient(70% 90% at 25% 15%, #F2B45A 0%, rgba(242,180,90,0) 60%), linear-gradient(160deg, #6B3A22 0%, #A55A2C 30%, #2E5052 65%, #142123 100%); }
+/* one visual language for every example: blue wallpaper = your desktop, sunset with mountains = a game */
+:root { --art-game: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 100' preserveAspectRatio='none'%3E%3Cpath d='M0 58 L45 34 L85 52 L135 18 L185 48 L235 28 L292 56 L342 26 L400 46 V100 H0Z' fill='%23182a2e'/%3E%3Cpath d='M0 80 L60 58 L112 74 L172 52 L242 78 L302 60 L362 80 L400 68 V100 H0Z' fill='%230b1416'/%3E%3C/svg%3E") bottom / 100% 48% no-repeat,
+    radial-gradient(60% 80% at 22% 16%, #D8923E 0%, rgba(216,146,62,0) 60%), linear-gradient(160deg, #4A2716 0%, #7C3F20 32%, #22383A 66%, #0D1617 100%); --art-desk: radial-gradient(70% 90% at 85% 5%, #3A5BA6 0%, rgba(58,91,166,0) 60%), radial-gradient(60% 80% at 5% 95%, #6E3B96 0%, rgba(110,59,150,0) 60%), linear-gradient(160deg, #19243F, #0D111E); }
+.scene { border-radius: 18px; overflow: hidden; position: relative; padding: 22px; min-height: 300px; display: grid; align-content: start; justify-items: end; background: var(--art-desk); }
+.gwin { position: absolute; left: 16px; right: 96px; top: 74px; bottom: -14px; z-index: 2; display: grid; grid-template-rows: 28px minmax(0, 1fr); border: 1px solid #2C323B; border-radius: 10px 10px 0 0; overflow: hidden; box-shadow: 0 20px 50px -10px rgba(0,0,0,.7); }
+.gwin-view { background: var(--art-game); }
+.win-bar { background: #23272E; display: flex; gap: 6px; align-items: center; padding-left: 10px; }
+.win-bar i { width: 9px; height: 9px; border-radius: 50%; background: #3A404A; }
+.win-bar span { margin-left: 8px; font-size: 12px; color: #9AA3AF; font-family: "Segoe UI", system-ui, sans-serif; }
+#overlay-widget { position: relative; z-index: 1; transition: opacity .25s; }
+.scene.pinned #overlay-widget { z-index: 3; }
+#overlay-widget.is-hidden { opacity: 0; }
 .game::before { content: ""; position: absolute; inset: 55% 0 0 0; background: linear-gradient(180deg, transparent, rgba(10,14,15,.65)); pointer-events: none; }
 .game > * { position: relative; }
 .slider { display: grid; gap: 8px; margin-top: 18px; }
@@ -233,8 +247,8 @@ footer a { color: var(--soft); }
 .cfg-opt[aria-pressed="true"] { background: var(--ink); color: #0A0D12; border-color: var(--ink); }
 .cfg-opt .sw { width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .cfg-stage { border-radius: 18px; padding: 26px 20px; display: grid; justify-items: center; align-content: center; gap: 14px; min-height: 360px; border: 1px solid var(--rule);
-  background: radial-gradient(90% 80% at 20% 0%, rgba(78,168,255,.14), transparent 60%), rgba(255,255,255,.025); }
-.cfg-stage.game { background: radial-gradient(60% 70% at 25% 15%, #F2B45A 0%, rgba(242,180,90,0) 60%), linear-gradient(160deg, #6B3A22 0%, #A55A2C 30%, #2E5052 65%, #142123 100%); }
+  background: var(--art-desk); }
+.cfg-stage.game { position: relative; background: var(--art-game); }
 .cfg-cap { font-size: 13px; color: var(--soft); text-align: center; max-width: 34em; }
 .cfg-stage.game .cfg-cap { color: #F3E6D8; }
 .cfg-cap b { color: var(--ink); }
@@ -254,7 +268,7 @@ footer a { color: var(--soft); }
   .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .figures div:nth-child(3) { border-left: 0; padding-left: 0; }
   .steps { grid-template-columns: minmax(0, 1fr); }
-  .keys div, .measure div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .key, .measure div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .hero { padding-block: 40px; }
 }
 </style>
@@ -350,15 +364,19 @@ footer a { color: var(--soft); }
             <h2>On the desktop, or over your game.</h2>
             <p>By default it sits behind your windows like part of the wallpaper. Pin it and it floats over everything, borderless games included, and clicks pass straight through. Choose how see-through it is.</p>
           </div>
-          <div class="game"><div class="wfit" id="overlay-widget"></div></div>
+          <div class="scene pinned" id="scene">
+            <div class="gwin" aria-hidden="true"><div class="win-bar"><i></i><i></i><i></i><span>Game</span></div><div class="gwin-view"></div></div>
+            <div class="wfit" id="overlay-widget"></div>
+          </div>
           <div class="slider">
-            <label for="see">Overlay transparency <b id="see-out">20%</b></label>
+            <label for="see">Transparency <b id="see-out">20%</b></label>
             <input id="see" type="range" min="0" max="100" step="20" value="20">
           </div>
-          <div class="keys">
-            <div><kbd>Ctrl+Alt+M</kbd><span>pin over everything, or back to the desktop</span></div>
-            <div><kbd>Ctrl+Alt+L</kbd><span>lite view: main stats only</span></div>
-            <div><kbd>Ctrl+Alt+H</kbd><span>hide or show</span></div>
+          <div class="keys" role="group" aria-label="Try the shortcuts">
+            <div class="keys-hint">Click a shortcut to try it</div>
+            <button type="button" class="key" id="k-pin" aria-pressed="true"><kbd>Ctrl+Alt+M</kbd><span>pin over everything, or back to the desktop</span></button>
+            <button type="button" class="key" id="k-lite" aria-pressed="false"><kbd>Ctrl+Alt+L</kbd><span>lite view: main stats only</span></button>
+            <button type="button" class="key" id="k-hide" aria-pressed="false"><kbd>Ctrl+Alt+H</kbd><span>hide or show</span></button>
           </div>
         </div>
       </div>
@@ -566,13 +584,13 @@ footer a { color: var(--soft); }
   }
 
   function frame(width, body, o = {}) {
-    const { status = 'Healthy', level = 'Good', overlay = false, see = 20, view = 'LITE' } = o;
+    const { status = 'Healthy', level = 'Good', overlay = false, clear = false, see = 20, view = 'LITE' } = o;
     const w = el('div', 'w', null, { width: width + 'px', maxWidth: '100%' });
-    if (overlay) {
+    if (overlay || clear) {
       const a = 1 - see / 100;
       w.style.background = `rgba(14,17,22,${a})`;
       w.style.borderColor = `rgba(255,255,255,${(0.15 * a).toFixed(3)})`;
-      w.style.boxShadow = 'none';
+      if (overlay || a < 1) w.style.boxShadow = 'none';
       w.style.setProperty('--surf', a);
     }
     const head = el('div', 'w-head');
@@ -733,7 +751,7 @@ footer a { color: var(--soft); }
       for (const k in groups) for (const [v, b] of groups[k]) b.setAttribute('aria-pressed', String(v === st[k]));
       stage.classList.toggle('game', st.overlay);
       see.hidden = !st.overlay;
-      seeLabel.replaceChildren(document.createTextNode('Overlay transparency'), el('b', null, st.see + '%'));
+      seeLabel.replaceChildren(document.createTextNode('Transparency'), el('b', null, st.see + '%'));
       const p = PRESETS.find(x => x[0] === st.use);
       cap.replaceChildren(document.createTextNode('Your widget: '), el('b', null, p[2].map(label).join(', ')),
         document.createTextNode(st.overlay ? ', floating over your game. Clicks pass through.' : ', on your desktop behind your windows.'));
@@ -796,8 +814,21 @@ footer a { color: var(--soft); }
   });
 
   var see = document.getElementById('see'), out = document.getElementById('see-out');
-  var ov = D.mount(document.getElementById('overlay-widget'), function () {
-    return D.frame(380, D.looks.minimal(['fps', 'hottest', 'ping', 'gpu']), { overlay: true, see: +see.value, status: 'Healthy' });
+  // the shortcut keys are buttons that act on this demo: pin / desktop, lite / full, hide / show
+  var demo = { pin: true, lite: false, hide: false };
+  var scene = document.getElementById('scene'), ovHost = document.getElementById('overlay-widget');
+  var ov = D.mount(ovHost, function () {
+    return D.frame(380, D.looks.minimal(['fps', 'hottest', 'ping', 'gpu'], demo.lite ? [] : ['cpu', 'ram', 'down', 'up']),
+      { overlay: demo.pin, clear: true, see: +see.value, view: demo.lite ? 'FULL' : 'LITE' });
+  });
+  function syncDemo() {
+    scene.classList.toggle('pinned', demo.pin);
+    ovHost.classList.toggle('is-hidden', demo.hide);
+    [['k-pin', 'pin'], ['k-lite', 'lite'], ['k-hide', 'hide']].forEach(function (k) { document.getElementById(k[0]).setAttribute('aria-pressed', String(demo[k[1]])); });
+    D.render(ov);
+  }
+  [['k-pin', 'pin'], ['k-lite', 'lite'], ['k-hide', 'hide']].forEach(function (k) {
+    document.getElementById(k[0]).addEventListener('click', function () { demo[k[1]] = !demo[k[1]]; syncDemo(); });
   });
   see.addEventListener('input', function () { out.textContent = see.value + '%' + (see.value === '100' ? ' (numbers only)' : see.value === '0' ? ' (solid)' : ''); D.render(ov); });
 
